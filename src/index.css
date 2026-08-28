@@ -1,21 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import 'tailwindcss';
+@import './styles/tokens.css';
 
 @theme {
-  --font-sans: 'Inter', system-ui, sans-serif;
-  --color-uni-red: #CC1111;
-  --color-uni-red-dark: #AA0000;
-  --color-uni-sidebar: #1C1C1E;
-  --color-uni-sidebar-hover: #2C2C2E;
-  --color-uni-topbar: #2A2A2C;
-  --color-uni-border: #E5E7EB;
-  --color-uni-muted: #6B7280;
-  --color-uni-success: #16A34A;
-  --color-uni-warning: #D97706;
+  --font-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --color-uni-primary: var(--kz-brand-primary);
+  --color-uni-primary-hover: var(--kz-brand-hover);
+  --color-uni-surface: var(--kz-surface);
+  --color-uni-bg: var(--kz-bg);
+  --color-uni-border: var(--kz-border);
 }
 
 html,
 body,
 #root {
   height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  background-color: var(--kz-bg);
+  color: var(--kz-text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--kz-border-strong);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--kz-text-muted);
 }

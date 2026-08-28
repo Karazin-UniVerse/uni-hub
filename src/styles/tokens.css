@@ -1,0 +1,89 @@
+﻿:root {
+  --kz-brand-primary: #0052CC;
+  --kz-brand-hover: #0747A6;
+  --kz-brand-light: #EBF3FF;
+  --kz-brand-dark: #003882;
+
+  --kz-bg: #F8F9FA;
+  --kz-surface: #FFFFFF;
+  --kz-surface-hover: #F1F3F5;
+  --kz-surface-active: #E9ECEF;
+  --kz-sidebar-bg: #1C1C1E;
+  --kz-sidebar-hover: #2C2C2E;
+  --kz-sidebar-active: #0052CC;
+  --kz-topbar-bg: #2A2A2C;
+
+  --kz-border: #E5E7EB;
+  --kz-border-strong: #D1D5DB;
+  --kz-border-subtle: #F3F4F6;
+
+  --kz-text-primary: #111827;
+  --kz-text-secondary: #4B5563;
+  --kz-text-muted: #9CA3AF;
+  --kz-text-inverse: #FFFFFF;
+
+  --kz-success: #16A34A;
+  --kz-success-bg: #F0FDF4;
+  --kz-success-text: #166534;
+  --kz-success-border: #BBF7D0;
+
+  --kz-warning: #D97706;
+  --kz-warning-bg: #FFFBEB;
+  --kz-warning-text: #92400E;
+  --kz-warning-border: #FDE68A;
+
+  --kz-danger: #DC2626;
+  --kz-danger-bg: #FEF2F2;
+  --kz-danger-text: #991B1B;
+  --kz-danger-border: #FECACA;
+
+  --kz-info: #2563EB;
+  --kz-info-bg: #EFF6FF;
+  --kz-info-text: #1E40AF;
+  --kz-info-border: #BFDBFE;
+
+  --kz-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --kz-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+  --kz-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  
+  --kz-radius-sm: 6px;
+  --kz-radius-md: 10px;
+  --kz-radius-lg: 14px;
+  --kz-radius-xl: 18px;
+  --kz-radius-full: 9999px;
+}
+
+[data-theme='dark'] {
+  --kz-bg: #0B0E14;
+  --kz-surface: #151921;
+  --kz-surface-hover: #1E232E;
+  --kz-surface-active: #282E3C;
+  --kz-sidebar-bg: #0E121A;
+  --kz-sidebar-hover: #1C222E;
+  --kz-sidebar-active: #0052CC;
+  --kz-topbar-bg: #151921;
+
+  --kz-border: #232936;
+  --kz-border-strong: #323A4C;
+  --kz-border-subtle: #191E2A;
+
+  --kz-text-primary: #F3F4F6;
+  --kz-text-secondary: #9CA3AF;
+  --kz-text-muted: #6B7280;
+
+  --kz-success-bg: rgba(22, 163, 74, 0.15);
+  --kz-success-text: #4ADE80;
+  --kz-success-border: rgba(22, 163, 74, 0.3);
+
+  --kz-warning-bg: rgba(217, 119, 6, 0.15);
+  --kz-warning-text: #FBBF24;
+  --kz-warning-border: rgba(217, 119, 6, 0.3);
+
+  --kz-danger-bg: rgba(220, 38, 38, 0.15);
+  --kz-danger-text: #F87171;
+  --kz-danger-border: rgba(220, 38, 38, 0.3);
+
+  --kz-info-bg: rgba(37, 99, 235, 0.15);
+  --kz-info-text: #60A5FA;
+  --kz-info-border: rgba(37, 99, 235, 0.3);
+}

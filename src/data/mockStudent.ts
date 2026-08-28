@@ -1,0 +1,29 @@
+﻿import { StudentProfile } from "../types/student"
+
+export const MOCK_STUDENT: StudentProfile = {
+  id: "karazin-cs-2024-001",
+  name: "Барсуков Родіон Сергійович",
+  avatarUrl:
+    "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+  university: "Харківський національний університет імені В. Н. Каразіна",
+  faculty: "ННІ комп'ютерних наук та штучного інтелекту",
+  specialty: "122 «Комп'ютерні науки»",
+  specialtyCode: "122",
+  degree: "Бакалавр",
+  group: "КС-12",
+  course: 2,
+  semester: 4,
+  studyType: "Денна",
+  paymentType: "Бюджет",
+  enrollmentOrder: "№ 0201-1/248 від 29.08.2024",
+  enrollmentDate: "01.09.2024",
+  duration: "3 роки 10 місяців",
+  endDate: "30.06.2028",
+  academicStatus: "Активний",
+  studentCardNumber: "KB № 84920194",
+  recordBookNumber: "ЗК-24-122-014",
+  email: "barsukov.rodion@student.karazin.ua",
+  gpa: 93.4,
+  totalCredits: 240,
+  completedCredits: 90,
+}
