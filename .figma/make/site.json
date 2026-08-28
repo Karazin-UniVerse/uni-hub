@@ -1,0 +1,10 @@
+{
+  "description": "Offers a user-friendly interface for exploring university resources and services, enhancing student engagement and campus connectivity.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
