@@ -1,19 +1,27 @@
-import React from "react"
-import { Bell, GraduationCap } from "lucide-react"
-import { StudentProfile } from "../../types/student"
-import { ThemeSwitcher } from "../../theme/ThemeSwitcher"
+import React from 'react';
+import { Bell, GraduationCap, LogIn, LogOut, CheckCircle2 } from 'lucide-react';
+import { StudentProfile } from '../../types/student';
+import { ThemeSwitcher } from '../../theme/ThemeSwitcher';
+import { useAuth } from '../../context/AuthContext';
 
 export interface HeaderProps {
-  student: StudentProfile
-  activeTab: string
-  onTabChange: (tab: string) => void
-  unreadNotificationsCount?: number
+  student: StudentProfile;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
+  onOpenLogin: () => void;
+  unreadNotificationsCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   student,
+  onOpenLogin,
   unreadNotificationsCount = 3,
 }) => {
+  const { user, isLoggedIn, logout, notifications } = useAuth();
+  const liveUnreadCount = isLoggedIn
+    ? notifications.filter((n) => !n.read).length
+    : unreadNotificationsCount;
+
   return (
     <header className="h-14 bg-[var(--kz-topbar-bg)] border-b border-[var(--kz-topbar-border)] flex items-center justify-between px-4 sm:px-6 shrink-0 z-20 transition-colors shadow-xs">
       {/* Brand logo & portal title */}
@@ -31,15 +39,27 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Center Semester indicator */}
+      {/* Center Semester indicator & Moodle sync state */}
       <div className="hidden md:flex items-center gap-2 bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] rounded-full px-3 py-1 text-xs text-[var(--kz-topbar-text)]">
-        <span className="w-2 h-2 rounded-full bg-[var(--kz-success)] animate-pulse" />
+        {isLoggedIn ? (
+          <>
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <CheckCircle2 size={12} /> Moodle Live
+            </span>
+            <span className="text-[var(--kz-topbar-muted)]">·</span>
+          </>
+        ) : (
+          <>
+            <span className="w-2 h-2 rounded-full bg-[var(--kz-success)]" />
+          </>
+        )}
         <span className="font-medium">Весняний семестр 2025/2026</span>
         <span className="text-[var(--kz-topbar-muted)]">·</span>
         <span className="text-[var(--kz-topbar-muted)]">Тиждень 4 (Знаменник)</span>
       </div>
 
-      {/* Right actions: ThemeSwitcher (Light/Dark/Cyberpunk), Notifications, Student profile */}
+      {/* Right actions: ThemeSwitcher (Light/Dark/Cyberpunk), Notifications, Student profile / Auth */}
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Multi-Theme Switcher from UniVerse */}
         <ThemeSwitcher compact />
@@ -51,28 +71,47 @@ export const Header: React.FC<HeaderProps> = ({
           aria-label="Сповіщення"
         >
           <Bell size={17} />
-          {unreadNotificationsCount > 0 && (
+          {liveUnreadCount > 0 && (
             <span className="absolute top-1.5 right-1.5 w-4 h-4 bg-[var(--kz-danger)] text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-[var(--kz-topbar-bg)]">
-              {unreadNotificationsCount}
+              {liveUnreadCount}
             </span>
           )}
         </button>
 
-        {/* User preview */}
+        {/* User profile / Login button */}
         <div className="flex items-center gap-2.5 pl-2 border-l border-[var(--kz-border)]">
-          <div className="w-8 h-8 rounded-full bg-[var(--kz-brand-light)] border border-[var(--kz-brand-primary)]/40 text-[var(--kz-brand-primary)] dark:text-[#60A5FA] flex items-center justify-center text-xs font-bold shrink-0">
-            РБ
-          </div>
-          <div className="hidden lg:block text-left">
-            <p className="text-xs font-bold text-[var(--kz-topbar-text)] leading-tight truncate max-w-[130px]">
-              {student.name}
-            </p>
-            <p className="text-[10px] text-[var(--kz-topbar-muted)] leading-tight mt-0.5">
-              {student.group} · {student.paymentType}
-            </p>
-          </div>
+          {isLoggedIn ? (
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-[var(--kz-brand-light)] border border-[var(--kz-brand-primary)]/40 text-[var(--kz-brand-primary)] dark:text-[#60A5FA] flex items-center justify-center text-xs font-bold shrink-0">
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'РБ'}
+              </div>
+              <div className="hidden lg:block text-left">
+                <p className="text-xs font-bold text-[var(--kz-topbar-text)] leading-tight truncate max-w-[130px]">
+                  {user?.name || student.name}
+                </p>
+                <p className="text-[10px] text-[var(--kz-topbar-muted)] leading-tight mt-0.5 truncate max-w-[130px]">
+                  {user?.email || student.group}
+                </p>
+              </div>
+              <button
+                onClick={logout}
+                className="p-1.5 text-[var(--kz-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                title="Вийти з акаунта"
+              >
+                <LogOut size={16} />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenLogin}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[var(--kz-brand-primary)] hover:bg-[var(--kz-brand-secondary)] text-white text-xs font-bold shadow-xs transition-all cursor-pointer"
+            >
+              <LogIn size={14} />
+              <span>Увійти</span>
+            </button>
+          )}
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
