@@ -8,6 +8,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MoodleModule } from './moodle/moodle.module';
 import { CertificatesModule } from './certificates/certificates.module';
+import { StudentProfileModule } from './student-profile/student-profile.module';
 import { AtGuard } from './auth/guards/at.guard';
 
 @Module({
@@ -18,6 +19,7 @@ import { AtGuard } from './auth/guards/at.guard';
     AuthModule,
     MoodleModule,
     CertificatesModule,
+    StudentProfileModule,
   ],
   controllers: [AppController],
   providers: [
