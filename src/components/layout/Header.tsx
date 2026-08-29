@@ -1,26 +1,21 @@
-﻿import React from "react"
-import { Bell, Moon, Sun, Search, LogOut, GraduationCap } from "lucide-react"
+import React from "react"
+import { Bell, GraduationCap } from "lucide-react"
 import { StudentProfile } from "../../types/student"
+import { ThemeSwitcher } from "../../theme/ThemeSwitcher"
 
 export interface HeaderProps {
   student: StudentProfile
   activeTab: string
   onTabChange: (tab: string) => void
-  isDark: boolean
-  onToggleTheme: () => void
   unreadNotificationsCount?: number
 }
 
 export const Header: React.FC<HeaderProps> = ({
   student,
-  activeTab,
-  onTabChange,
-  isDark,
-  onToggleTheme,
   unreadNotificationsCount = 3,
 }) => {
   return (
-    <header className="h-14 bg-[var(--kz-sidebar-bg)] border-b border-white/5 flex items-center justify-between px-4 sm:px-6 shrink-0 z-20">
+    <header className="h-14 bg-[var(--kz-sidebar-bg)] border-b border-white/5 flex items-center justify-between px-4 sm:px-6 shrink-0 z-20 transition-colors">
       {/* Brand logo & portal title */}
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-[var(--kz-brand-primary)] flex items-center justify-center text-white shadow-sm shadow-blue-500/30 font-bold">
@@ -36,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
       </div>
 
-      {/* Center Semester indicator & quick search */}
+      {/* Center Semester indicator */}
       <div className="hidden md:flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-xs text-white/80">
         <span className="w-2 h-2 rounded-full bg-[var(--kz-success)] animate-pulse" />
         <span className="font-medium">Весняний семестр 2025/2026</span>
@@ -44,21 +39,10 @@ export const Header: React.FC<HeaderProps> = ({
         <span className="text-white/60">Тиждень 4 (Знаменник)</span>
       </div>
 
-      {/* Right actions: Theme toggle, Notifications, Student profile */}
+      {/* Right actions: ThemeSwitcher (Light/Dark/Cyberpunk), Notifications, Student profile */}
       <div className="flex items-center gap-2 sm:gap-3">
-        {/* Theme toggle */}
-        <button
-          onClick={onToggleTheme}
-          className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
-          title={isDark ? "Увімкнути світлу тему" : "Увімкнути темну тему"}
-          aria-label="Перемикач теми"
-        >
-          {isDark ? (
-            <Sun size={17} className="text-amber-400" />
-          ) : (
-            <Moon size={17} />
-          )}
-        </button>
+        {/* Multi-Theme Switcher from UniVerse */}
+        <ThemeSwitcher compact />
 
         {/* Notifications */}
         <button
@@ -84,7 +68,7 @@ export const Header: React.FC<HeaderProps> = ({
               {student.name}
             </p>
             <p className="text-[10px] text-white/50 leading-tight mt-0.5">
-              {student.group} · 2 курс
+              {student.group} · {student.paymentType}
             </p>
           </div>
         </div>

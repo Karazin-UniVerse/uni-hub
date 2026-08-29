@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react"
+import React, { useState } from "react"
 import { Header } from "./components/layout/Header"
 import { Sidebar } from "./components/layout/Sidebar"
 import { MobileNav } from "./components/layout/MobileNav"
@@ -15,11 +15,7 @@ import { GradesTable } from "./components/grades/GradesTable"
 import { GradeDynamicChart } from "./components/grades/GradeDynamicChart"
 
 import { ScheduleWeekMatrix } from "./components/schedule/ScheduleWeekMatrix"
-
-import { RequisitesCard } from "./components/finances/RequisitesCard"
-import { QrPaymentModal } from "./components/finances/QrPaymentModal"
-import { PaymentHistoryTable } from "./components/finances/PaymentHistoryTable"
-import { TuitionBalanceCard } from "./components/finances/TuitionBalanceCard"
+import { FinancesView } from "./components/finances/FinancesView"
 
 import { StudentAcademicCard } from "./components/profile/StudentAcademicCard"
 import { TranscriptTable } from "./components/profile/TranscriptTable"
@@ -28,14 +24,8 @@ import { CertificateOrderModal } from "./components/profile/CertificateOrderModa
 // Mock data & Hooks
 import { MOCK_STUDENT } from "./data/mockStudent"
 import { MOCK_DISCIPLINES, MOCK_TRANSCRIPT } from "./data/mockGrades"
-import {
-  MOCK_REQUISITES,
-  MOCK_PAYMENTS,
-  MOCK_CONTRACT,
-} from "./data/mockFinances"
 import { MOCK_SCHEDULE } from "./data/mockSchedule"
 
-import { useTheme } from "./hooks/useTheme"
 import { useClipboard } from "./hooks/useClipboard"
 import { useToast } from "./hooks/useToast"
 
@@ -44,10 +34,8 @@ export default function App() {
   const [selectedDisciplineId, setSelectedDisciplineId] = useState<string>(
     MOCK_DISCIPLINES[0].id,
   )
-  const [isQrModalOpen, setIsQrModalOpen] = useState(false)
   const [isCertModalOpen, setIsCertModalOpen] = useState(false)
 
-  const { theme, toggleTheme, isDark } = useTheme()
   const { copy, isCopied } = useClipboard()
   const { toasts, addToast, removeToast } = useToast()
 
@@ -75,7 +63,7 @@ export default function App() {
       case "schedule":
         return "Розклад навчальних занять"
       case "finances":
-        return "Оплата навчання та банківські реквізити"
+        return "Фінанси, стипендія та реквізити"
       case "profile":
         return "Профіль студента та електронний деканат"
       default:
@@ -84,14 +72,12 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[var(--kz-bg)] text-[var(--kz-text-primary)]">
+    <div className="flex flex-col h-screen overflow-hidden bg-[var(--kz-bg)] text-[var(--kz-text-primary)] transition-colors">
       {/* Top Header */}
       <Header
         student={MOCK_STUDENT}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        isDark={isDark}
-        onToggleTheme={toggleTheme}
         unreadNotificationsCount={3}
       />
 
@@ -200,25 +186,13 @@ export default function App() {
               </div>
             )}
 
-            {/* TAB 4: FINANCES */}
+            {/* TAB 4: FINANCES (Бюджет + Контракт) */}
             {activeTab === "finances" && (
-              <div className="space-y-5 animate-in fade-in duration-200">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-                  <div className="lg:col-span-2 space-y-5">
-                    <RequisitesCard
-                      requisites={MOCK_REQUISITES}
-                      onOpenQr={() => setIsQrModalOpen(true)}
-                      onCopy={handleCopy}
-                      isCopied={isCopied}
-                    />
-                    <PaymentHistoryTable payments={MOCK_PAYMENTS} />
-                  </div>
-
-                  <div className="lg:col-span-1 space-y-5">
-                    <TuitionBalanceCard contract={MOCK_CONTRACT} />
-                  </div>
-                </div>
-              </div>
+              <FinancesView
+                initialMode="budget"
+                onCopy={handleCopy}
+                isCopied={isCopied}
+              />
             )}
 
             {/* TAB 5: PROFILE & E-DEAN */}
@@ -239,15 +213,6 @@ export default function App() {
       <MobileNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       {/* Modals */}
-      <QrPaymentModal
-        isOpen={isQrModalOpen}
-        onClose={() => setIsQrModalOpen(false)}
-        requisites={MOCK_REQUISITES}
-        amount={MOCK_REQUISITES.standardContractAmount}
-        onCopy={handleCopy}
-        isCopied={isCopied}
-      />
-
       <CertificateOrderModal
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}

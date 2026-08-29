@@ -1,4 +1,4 @@
-﻿:root {
+:root {
   --kz-brand-primary: #0052CC;
   --kz-brand-hover: #0747A6;
   --kz-brand-light: #EBF3FF;
@@ -54,13 +54,18 @@
 }
 
 [data-theme='dark'] {
+  --kz-brand-primary: #3466E7;
+  --kz-brand-hover: #164BD7;
+  --kz-brand-light: rgba(52, 102, 231, 0.15);
+  --kz-brand-dark: #003882;
+
   --kz-bg: #0B0E14;
   --kz-surface: #151921;
   --kz-surface-hover: #1E232E;
   --kz-surface-active: #282E3C;
   --kz-sidebar-bg: #0E121A;
   --kz-sidebar-hover: #1C222E;
-  --kz-sidebar-active: #0052CC;
+  --kz-sidebar-active: #3466E7;
   --kz-topbar-bg: #151921;
 
   --kz-border: #232936;
@@ -86,4 +91,53 @@
   --kz-info-bg: rgba(37, 99, 235, 0.15);
   --kz-info-text: #60A5FA;
   --kz-info-border: rgba(37, 99, 235, 0.3);
+}
+
+[data-theme='cyberpunk'] {
+  --kz-brand-primary: #00F0FF;
+  --kz-brand-hover: #00C8D6;
+  --kz-brand-light: rgba(0, 240, 255, 0.15);
+  --kz-brand-dark: #008891;
+
+  --kz-bg: #090A0F;
+  --kz-surface: #111420;
+  --kz-surface-hover: #191E30;
+  --kz-surface-active: #242B42;
+  --kz-sidebar-bg: #06070B;
+  --kz-sidebar-hover: #151A2C;
+  --kz-sidebar-active: #00F0FF;
+  --kz-topbar-bg: #111420;
+
+  --kz-border: rgba(0, 240, 255, 0.25);
+  --kz-border-strong: rgba(255, 0, 85, 0.45);
+  --kz-border-subtle: rgba(0, 240, 255, 0.12);
+
+  --kz-text-primary: #00F0FF;
+  --kz-text-secondary: #E0E7FF;
+  --kz-text-muted: #7E8BA5;
+  --kz-text-inverse: #000000;
+
+  --kz-success: #00FF88;
+  --kz-success-bg: rgba(0, 255, 136, 0.15);
+  --kz-success-text: #00FF88;
+  --kz-success-border: rgba(0, 255, 136, 0.35);
+
+  --kz-warning: #FFE600;
+  --kz-warning-bg: rgba(255, 230, 0, 0.15);
+  --kz-warning-text: #FFE600;
+  --kz-warning-border: rgba(255, 230, 0, 0.35);
+
+  --kz-danger: #FF0055;
+  --kz-danger-bg: rgba(255, 0, 85, 0.15);
+  --kz-danger-text: #FF0055;
+  --kz-danger-border: rgba(255, 0, 85, 0.35);
+
+  --kz-info: #7C5CFF;
+  --kz-info-bg: rgba(124, 92, 255, 0.15);
+  --kz-info-text: #B4A0FF;
+  --kz-info-border: rgba(124, 92, 255, 0.35);
+
+  --kz-shadow-sm: 0 0 5px rgba(0, 240, 255, 0.3);
+  --kz-shadow-md: 0 0 10px rgba(255, 0, 85, 0.4), 0 0 20px rgba(0, 240, 255, 0.15);
+  --kz-shadow-lg: 0 0 15px rgba(255, 230, 0, 0.5), 0 0 30px rgba(255, 0, 85, 0.3);
 }
