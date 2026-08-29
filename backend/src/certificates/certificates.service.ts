@@ -3,6 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
+import { randomBytes } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateCertificateDto } from './dto/create-certificate.dto';
 import { UpdateCertificateStatusDto } from './dto/update-certificate-status.dto';
@@ -20,7 +21,8 @@ export class CertificatesService {
     userId: string,
     dto: CreateCertificateDto,
   ): Promise<CertificateResponseDto> {
-    const verificationCode = `KZ-2026-${Math.random().toString(36).substring(2, 6).toUpperCase()}-${Date.now().toString().slice(-4)}`;
+    const randomHex = randomBytes(6).toString('hex').toUpperCase();
+    const verificationCode = `KZ-2026-${randomHex}`;
 
     const cert = await this.prisma.certificateRequest.create({
       data: {
@@ -81,21 +83,21 @@ export class CertificatesService {
     }
 
     const student = cert.user.studentProfile;
+    const isSigned = cert.status === CertificateStatus.SIGNED || cert.status === CertificateStatus.READY;
 
     return {
-      valid: cert.status === CertificateStatus.SIGNED || cert.status === CertificateStatus.READY,
+      valid: isSigned,
       verificationCode: cert.verificationCode,
       type: cert.type,
       studentName: cert.user.name || 'Студент ХНУ',
-      specialty: student ? `${student.specialtyCode} ${student.specialty}` : '122 Комп’ютерні науки',
-      group: student?.group || 'КС-12',
+      specialty: student ? `${student.specialtyCode} ${student.specialty}` : 'Не вказано',
+      group: student?.group || 'Не вказано',
       university: student?.university || 'Харківський національний університет імені В. Н. Каразіна',
       status: cert.status,
       issuedAt: cert.createdAt,
-      digitalSignature:
-        cert.status === CertificateStatus.SIGNED || cert.status === CertificateStatus.READY
-          ? 'ЕЦП Сертифікат № 492019-ХНУ (ВАЛІДНИЙ)'
-          : 'Очікує підписання ЕЦП',
+      digitalSignature: isSigned
+        ? `КЕП ХНУ імені В. Н. Каразіна (Реєстраційний № ${cert.verificationCode})`
+        : 'Очікує підписання КЕП',
     };
   }
 
