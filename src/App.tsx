@@ -1,112 +1,83 @@
-import React, { useState } from 'react';
-import { Header } from './components/layout/Header';
-import { Sidebar } from './components/layout/Sidebar';
-import { MobileNav } from './components/layout/MobileNav';
-import { ToastContainer } from './components/ui/Toast';
+import React, { useState } from "react"
+import { Header } from "./components/layout/Header"
+import { Sidebar } from "./components/layout/Sidebar"
+import { MobileNav } from "./components/layout/MobileNav"
+import { ToastContainer } from "./components/ui/Toast"
 
 // Feature components
-import { WelcomeBanner } from './components/dashboard/WelcomeBanner';
-import { DeadlinesWidget } from './components/dashboard/DeadlinesWidget';
-import { RecentGradesWidget } from './components/dashboard/RecentGradesWidget';
-import { TodayScheduleWidget } from './components/dashboard/TodayScheduleWidget';
+import { WelcomeBanner } from "./components/dashboard/WelcomeBanner"
+import { DeadlinesWidget } from "./components/dashboard/DeadlinesWidget"
+import { RecentGradesWidget } from "./components/dashboard/RecentGradesWidget"
+import { TodayScheduleWidget } from "./components/dashboard/TodayScheduleWidget"
 
-import { DisciplineSelector } from './components/grades/DisciplineSelector';
-import { GradesTable } from './components/grades/GradesTable';
-import { GradeDynamicChart } from './components/grades/GradeDynamicChart';
+import { DisciplineSelector } from "./components/grades/DisciplineSelector"
+import { GradesTable } from "./components/grades/GradesTable"
+import { GradeDynamicChart } from "./components/grades/GradeDynamicChart"
 
-import { ScheduleWeekMatrix } from './components/schedule/ScheduleWeekMatrix';
-import { FinancesView } from './components/finances/FinancesView';
+import { ScheduleWeekMatrix } from "./components/schedule/ScheduleWeekMatrix"
+import { FinancesView } from "./components/finances/FinancesView"
 
-import { StudentAcademicCard } from './components/profile/StudentAcademicCard';
-import { TranscriptTable } from './components/profile/TranscriptTable';
-import { CertificateOrderModal } from './components/profile/CertificateOrderModal';
-import { LoginModal } from './components/auth/LoginModal';
+import { StudentAcademicCard } from "./components/profile/StudentAcademicCard"
+import { TranscriptTable } from "./components/profile/TranscriptTable"
+import { CertificateOrderModal } from "./components/profile/CertificateOrderModal"
 
-// Mock data & Hooks & Context
-import { MOCK_STUDENT } from './data/mockStudent';
-import { MOCK_DISCIPLINES, MOCK_TRANSCRIPT } from './data/mockGrades';
-import { MOCK_SCHEDULE } from './data/mockSchedule';
+// Mock data & Hooks
+import { MOCK_STUDENT } from "./data/mockStudent"
+import { MOCK_DISCIPLINES, MOCK_TRANSCRIPT } from "./data/mockGrades"
+import { MOCK_SCHEDULE } from "./data/mockSchedule"
 
-import { useClipboard } from './hooks/useClipboard';
-import { useToast } from './hooks/useToast';
-import { AuthProvider, useAuth } from './context/AuthContext';
+import { useClipboard } from "./hooks/useClipboard"
+import { useToast } from "./hooks/useToast"
 
-function UniHubMain() {
-  const [activeTab, setActiveTab] = useState<string>('dashboard');
+export default function App() {
+  const [activeTab, setActiveTab] = useState<string>("dashboard")
   const [selectedDisciplineId, setSelectedDisciplineId] = useState<string>(
-    MOCK_DISCIPLINES[0].id
-  );
-  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
-  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    MOCK_DISCIPLINES[0].id,
+  )
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false)
 
-  const { user, isLoggedIn, courses } = useAuth();
-  const { copy, isCopied } = useClipboard();
-  const { toasts, addToast, removeToast } = useToast();
-
-  const currentStudent = {
-    ...MOCK_STUDENT,
-    name: user?.name || MOCK_STUDENT.name,
-    email: user?.email || MOCK_STUDENT.email,
-  };
-
-  // Convert live Moodle courses to disciplines if logged in and courses exist
-  const activeDisciplines =
-    isLoggedIn && courses.length > 0
-      ? courses.map((c, idx) => ({
-          id: String(c.id),
-          name: c.fullname,
-          code: c.shortname || `CS-${c.id}`,
-          department: 'Кафедра комп’ютерних наук',
-          instructor: 'Викладач кафедри',
-          credits: 4,
-          controlType: 'Іспит' as const,
-          currentGrade: 85 + (idx % 10),
-          maxGrade: 100,
-          averageGrade: 88,
-          tasks: MOCK_DISCIPLINES[0].tasks,
-        }))
-      : MOCK_DISCIPLINES;
+  const { copy, isCopied } = useClipboard()
+  const { toasts, addToast, removeToast } = useToast()
 
   const currentDiscipline =
-    activeDisciplines.find((d) => d.id === selectedDisciplineId) ||
-    activeDisciplines[0];
+    MOCK_DISCIPLINES.find((d) => d.id === selectedDisciplineId) ||
+    MOCK_DISCIPLINES[0]
 
   const handleCopy = async (text: string, label: string) => {
-    const success = await copy(text);
+    const success = await copy(text)
     if (success) {
       addToast({
-        type: 'success',
-        title: 'Успішно скопійовано',
+        type: "success",
+        title: "Успішно скопійовано",
         message: `${label} додано в буфер обміну.`,
-      });
+      })
     }
-  };
+  }
 
   const getPageTitle = () => {
     switch (activeTab) {
-      case 'dashboard':
-        return 'Головна панель (Дашборд)';
-      case 'grades':
-        return 'Журнал оцінок та аналітика успішності';
-      case 'schedule':
-        return 'Розклад навчальних занять';
-      case 'finances':
-        return 'Фінанси, стипендія та реквізити';
-      case 'profile':
-        return 'Профіль студента та електронний деканат';
+      case "dashboard":
+        return "Головна панель (Дашборд)"
+      case "grades":
+        return "Журнал оцінок та аналітика успішності"
+      case "schedule":
+        return "Розклад навчальних занять"
+      case "finances":
+        return "Фінанси, стипендія та реквізити"
+      case "profile":
+        return "Профіль студента та електронний деканат"
       default:
-        return 'UniHub Студентський кабінет';
+        return "UniHub Студентський кабінет"
     }
-  };
+  }
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[var(--kz-bg)] text-[var(--kz-text-primary)] transition-colors">
       {/* Top Header */}
       <Header
-        student={currentStudent}
+        student={MOCK_STUDENT}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onOpenLogin={() => setIsLoginModalOpen(true)}
         unreadNotificationsCount={3}
       />
 
@@ -131,16 +102,16 @@ function UniHubMain() {
             </div>
 
             {/* TAB 1: DASHBOARD */}
-            {activeTab === 'dashboard' && (
+            {activeTab === "dashboard" && (
               <div className="space-y-5 animate-in fade-in duration-200">
-                <WelcomeBanner student={currentStudent} />
+                <WelcomeBanner student={MOCK_STUDENT} />
 
                 {/* 3 Widgets Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <DeadlinesWidget />
                   <TodayScheduleWidget />
                   <RecentGradesWidget
-                    onOpenGrades={() => setActiveTab('grades')}
+                    onOpenGrades={() => setActiveTab("grades")}
                   />
                 </div>
 
@@ -155,13 +126,13 @@ function UniHubMain() {
             )}
 
             {/* TAB 2: GRADES */}
-            {activeTab === 'grades' && (
+            {activeTab === "grades" && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
                   {/* Left disciplines selector */}
                   <div className="lg:col-span-1">
                     <DisciplineSelector
-                      disciplines={activeDisciplines}
+                      disciplines={MOCK_DISCIPLINES}
                       selectedId={selectedDisciplineId}
                       onSelect={setSelectedDisciplineId}
                     />
@@ -178,7 +149,7 @@ function UniHubMain() {
                           {currentDiscipline.name}
                         </h2>
                         <p className="text-xs text-[var(--kz-text-secondary)] mt-0.5">
-                          {currentDiscipline.department} ·{' '}
+                          {currentDiscipline.department} ·{" "}
                           {currentDiscipline.instructor}
                         </p>
                       </div>
@@ -209,14 +180,14 @@ function UniHubMain() {
             )}
 
             {/* TAB 3: SCHEDULE */}
-            {activeTab === 'schedule' && (
+            {activeTab === "schedule" && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <ScheduleWeekMatrix schedule={MOCK_SCHEDULE} />
               </div>
             )}
 
             {/* TAB 4: FINANCES (Бюджет + Контракт) */}
-            {activeTab === 'finances' && (
+            {activeTab === "finances" && (
               <FinancesView
                 initialMode="budget"
                 onCopy={handleCopy}
@@ -225,10 +196,10 @@ function UniHubMain() {
             )}
 
             {/* TAB 5: PROFILE & E-DEAN */}
-            {activeTab === 'profile' && (
+            {activeTab === "profile" && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <StudentAcademicCard
-                  student={currentStudent}
+                  student={MOCK_STUDENT}
                   onOrderCertificate={() => setIsCertModalOpen(true)}
                 />
                 <TranscriptTable items={MOCK_TRANSCRIPT} />
@@ -245,24 +216,11 @@ function UniHubMain() {
       <CertificateOrderModal
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}
-        student={currentStudent}
-      />
-
-      <LoginModal
-        isOpen={isLoginModalOpen}
-        onClose={() => setIsLoginModalOpen(false)}
+        student={MOCK_STUDENT}
       />
 
       {/* Toast notifications container */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
-  );
-}
-
-export default function App() {
-  return (
-    <AuthProvider>
-      <UniHubMain />
-    </AuthProvider>
-  );
+  )
 }
