@@ -4,6 +4,7 @@ import { Card } from '../ui/Card';
 import { Button } from '../ui/Button';
 import { Modal } from '../ui/Modal';
 import { StudentBankAccount } from '../../types/finances';
+import { fireCelebrationConfetti } from '../../utils/confetti';
 
 export interface StudentBankCardProps {
   bankAccount: StudentBankAccount;
@@ -23,6 +24,7 @@ export const StudentBankCard: React.FC<StudentBankCardProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitted(true);
+    fireCelebrationConfetti();
   };
 
   const handleClose = () => {

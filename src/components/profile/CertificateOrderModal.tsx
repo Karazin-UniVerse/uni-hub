@@ -1,4 +1,4 @@
-﻿import React, { useState } from "react"
+import React, { useState } from "react"
 import { QRCodeSVG } from "qrcode.react"
 import {
   FileText,
@@ -11,6 +11,8 @@ import {
 import { Modal } from "../ui/Modal"
 import { Button } from "../ui/Button"
 import { StudentProfile } from "../../types/student"
+
+import { fireCelebrationConfetti } from "../../utils/confetti"
 
 export interface CertificateOrderModalProps {
   isOpen: boolean
@@ -32,6 +34,7 @@ export const CertificateOrderModal: React.FC<CertificateOrderModalProps> = ({
   const handleGenerate = (e: React.FormEvent) => {
     e.preventDefault()
     setIsGenerated(true)
+    fireCelebrationConfetti()
   }
 
   const handleReset = () => {
