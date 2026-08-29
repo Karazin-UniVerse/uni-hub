@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { MoodleModule } from './moodle/moodle.module';
 import { CertificatesModule } from './certificates/certificates.module';
 import { StudentProfileModule } from './student-profile/student-profile.module';
+import { FinancesModule } from './finances/finances.module';
 import { AtGuard } from './auth/guards/at.guard';
 
 @Module({
@@ -20,6 +21,7 @@ import { AtGuard } from './auth/guards/at.guard';
     MoodleModule,
     CertificatesModule,
     StudentProfileModule,
+    FinancesModule,
   ],
   controllers: [AppController],
   providers: [
