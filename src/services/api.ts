@@ -208,4 +208,60 @@ export const moodleApi = {
     }),
 };
 
-export default { request, authApi, moodleApi };
+export interface OrderCertificateDto {
+  type: string;
+  purpose: string;
+  deliveryType?: 'digital_pdf' | 'physical_dean';
+}
+
+export interface CertificateResponse {
+  id: string;
+  type: string;
+  purpose: string;
+  deliveryType: string;
+  status: string;
+  verificationCode: string;
+  pdfUrl?: string;
+  createdAt: string;
+}
+
+export interface PaymentTransactionResponse {
+  id: string;
+  amount: number;
+  purpose: string;
+  status: string;
+  recipientIban: string;
+  paidAt?: string;
+  createdAt: string;
+}
+
+export interface ScholarshipRecordResponse {
+  id: string;
+  month: number;
+  year: number;
+  type: string;
+  amount: number;
+  status: string;
+  paidAt?: string;
+}
+
+export const certificatesApi = {
+  order: (data: OrderCertificateDto) =>
+    request<CertificateResponse>('/certificates/order', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  getMyCertificates: () =>
+    request<CertificateResponse[]>('/certificates/my'),
+  getById: (id: string) =>
+    request<CertificateResponse>(`/certificates/${id}`),
+};
+
+export const financesApi = {
+  getPayments: () =>
+    request<PaymentTransactionResponse[]>('/finances/payments'),
+  getScholarships: () =>
+    request<ScholarshipRecordResponse[]>('/finances/scholarships'),
+};
+
+export default { request, authApi, moodleApi, certificatesApi, financesApi };

@@ -3,14 +3,18 @@
     "private":  true,
     "version":  "1.0.0",
     "type":  "module",
-    "scripts":  {
-                    "dev":  "vite --host 0.0.0.0",
-                    "build":  "vite build",
-                    "preview":  "vite preview",
-                    "format":  "oxfmt",
-                    "typecheck":  "tsc --noEmit",
-                    "lint":  "oxlint"
-                },
+    "scripts": {
+        "dev": "vite --host 0.0.0.0",
+        "build": "vite build",
+        "preview": "vite preview",
+        "format": "oxfmt",
+        "typecheck": "tsc --noEmit",
+        "lint": "oxlint",
+        "dev:backend": "pnpm --filter unihub-backend start:dev",
+        "build:backend": "pnpm --filter unihub-backend build",
+        "test:backend": "pnpm --filter unihub-backend test",
+        "db:generate": "pnpm --filter unihub-backend db:generate"
+    },
     "dependencies":  {
                          "canvas-confetti":  "^1.9.4",
                          "clsx":  "^2.1.1",

@@ -1,4 +1,4 @@
-﻿export interface StudentProfile {
+export interface StudentProfile {
   id: string
   name: string
   avatarUrl?: string
@@ -20,7 +20,8 @@
   studentCardNumber: string
   recordBookNumber: string
   email: string
-  gpa: number
+  ratingScore: number
+  gpa?: number
   totalCredits: number
   completedCredits: number
 }

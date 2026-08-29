@@ -1,4 +1,4 @@
-﻿import { StudentProfile } from "../types/student"
+import { StudentProfile } from "../types/student"
 
 export const MOCK_STUDENT: StudentProfile = {
   id: "karazin-cs-2024-001",
@@ -23,6 +23,7 @@ export const MOCK_STUDENT: StudentProfile = {
   studentCardNumber: "KB № 84920194",
   recordBookNumber: "ЗК-24-122-014",
   email: "barsukov.rodion@student.karazin.ua",
+  ratingScore: 93.4,
   gpa: 93.4,
   totalCredits: 240,
   completedCredits: 90,
