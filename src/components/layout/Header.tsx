@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, GraduationCap, LogIn, LogOut, CheckCircle2 } from 'lucide-react';
+import { Bell, GraduationCap, LogIn, LogOut, CheckCircle2, RefreshCw, AlertCircle } from 'lucide-react';
 import { StudentProfile } from '../../types/student';
 import { ThemeSwitcher } from '../../theme/ThemeSwitcher';
 import { useAuth } from '../../context/AuthContext';
@@ -17,7 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenLogin,
   unreadNotificationsCount = 3,
 }) => {
-  const { user, isLoggedIn, logout, notifications } = useAuth();
+  const { user, isLoggedIn, logout, notifications, syncStatus } = useAuth();
   const liveUnreadCount = isLoggedIn
     ? notifications.filter((n) => !n.read).length
     : unreadNotificationsCount;
@@ -41,7 +41,7 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Center Semester indicator & Moodle sync state */}
       <div className="hidden md:flex items-center gap-2 bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] rounded-full px-3 py-1 text-xs text-[var(--kz-topbar-text)]">
-        {isLoggedIn ? (
+        {isLoggedIn && syncStatus === 'synced' && (
           <>
             <span className="w-2 h-2 rounded-full bg-[var(--kz-success)] animate-pulse" />
             <span className="font-medium text-[var(--kz-success)] flex items-center gap-1">
@@ -49,11 +49,28 @@ export const Header: React.FC<HeaderProps> = ({
             </span>
             <span className="text-[var(--kz-topbar-muted)]">·</span>
           </>
-        ) : (
+        )}
+
+        {isLoggedIn && syncStatus === 'syncing' && (
           <>
-            <span className="w-2 h-2 rounded-full bg-[var(--kz-success)]" />
+            <RefreshCw size={12} className="text-[var(--kz-brand-primary)] animate-spin" />
+            <span className="font-medium text-[var(--kz-brand-primary)]">Синхронізація...</span>
+            <span className="text-[var(--kz-topbar-muted)]">·</span>
           </>
         )}
+
+        {isLoggedIn && syncStatus === 'error' && (
+          <>
+            <AlertCircle size={12} className="text-[var(--kz-danger)]" />
+            <span className="font-medium text-[var(--kz-danger)]">Moodle Offline</span>
+            <span className="text-[var(--kz-topbar-muted)]">·</span>
+          </>
+        )}
+
+        {!isLoggedIn && (
+          <span className="w-2 h-2 rounded-full bg-[var(--kz-text-muted)]" />
+        )}
+
         <span className="font-medium">Весняний семестр 2025/2026</span>
         <span className="text-[var(--kz-topbar-muted)]">·</span>
         <span className="text-[var(--kz-topbar-muted)]">Тиждень 4 (Знаменник)</span>
@@ -83,7 +100,7 @@ export const Header: React.FC<HeaderProps> = ({
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-[var(--kz-brand-light)] border border-[var(--kz-brand-primary)]/40 text-[var(--kz-brand-primary)] flex items-center justify-center text-xs font-bold shrink-0">
-                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'РБ'}
+                {user?.name ? user.name.slice(0, 2).toUpperCase() : 'СТ'}
               </div>
               <div className="hidden lg:block text-left">
                 <p className="text-xs font-bold text-[var(--kz-topbar-text)] leading-tight truncate max-w-[130px]">

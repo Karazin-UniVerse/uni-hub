@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
@@ -26,6 +26,8 @@ import { LoginModal } from './components/auth/LoginModal';
 import { MOCK_STUDENT } from './data/mockStudent';
 import { MOCK_DISCIPLINES, MOCK_TRANSCRIPT } from './data/mockGrades';
 import { MOCK_SCHEDULE } from './data/mockSchedule';
+import { StudentProfile } from './types/student';
+import { DisciplineGrades } from './types/grades';
 
 import { useClipboard } from './hooks/useClipboard';
 import { useToast } from './hooks/useToast';
@@ -39,33 +41,54 @@ function UniHubMain() {
   const [isCertModalOpen, setIsCertModalOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const { user, isLoggedIn, courses } = useAuth();
+  const { user, isLoggedIn, courses, grades } = useAuth();
   const { copy, isCopied } = useClipboard();
   const { toasts, addToast, removeToast } = useToast();
 
-  const currentStudent = {
-    ...MOCK_STUDENT,
-    name: user?.name || MOCK_STUDENT.name,
-    email: user?.email || MOCK_STUDENT.email,
-  };
+  // Construct student profile: verified user data if logged in, otherwise mock student
+  const currentStudent: StudentProfile = useMemo(() => {
+    if (isLoggedIn && user) {
+      return {
+        ...MOCK_STUDENT,
+        id: user.id || 'usr-live-01',
+        name: user.name || user.email.split('@')[0],
+        email: user.email,
+        studentCardNumber: user.moodleId
+          ? `ХНУ-МД-${user.moodleId}`
+          : MOCK_STUDENT.studentCardNumber,
+      };
+    }
+    return MOCK_STUDENT;
+  }, [isLoggedIn, user]);
 
-  // Convert live Moodle courses to disciplines if logged in and courses exist
-  const activeDisciplines =
-    isLoggedIn && courses.length > 0
-      ? courses.map((c, idx) => ({
+  // Convert live Moodle courses and grades to disciplines
+  const activeDisciplines: DisciplineGrades[] = useMemo(() => {
+    if (isLoggedIn && courses.length > 0) {
+      return courses.map((c) => {
+        const liveGradeObj = grades.find((g) => g.courseid === c.id);
+        const parsedGrade = liveGradeObj?.grade ? parseFloat(liveGradeObj.grade) : null;
+        const currentGrade = parsedGrade && !isNaN(parsedGrade) ? parsedGrade : 85;
+
+        return {
           id: String(c.id),
           name: c.fullname,
           code: c.shortname || `CS-${c.id}`,
-          department: 'Кафедра комп’ютерних наук',
-          instructor: 'Викладач кафедри',
+          department: 'ННІ комп’ютерних наук',
+          instructor: 'Викладач курсу Moodle',
           credits: 4,
           controlType: 'Іспит' as const,
-          currentGrade: 85 + (idx % 10),
+          currentGrade,
           maxGrade: 100,
           averageGrade: 88,
-          tasks: MOCK_DISCIPLINES[0].tasks,
-        }))
-      : MOCK_DISCIPLINES;
+          tasks: MOCK_DISCIPLINES[0].tasks.map((t) => ({
+            ...t,
+            score: Math.min(t.maxScore, Math.round((currentGrade / 100) * t.maxScore)),
+          })),
+        };
+      });
+    }
+    return MOCK_DISCIPLINES;
+  }, [isLoggedIn, courses, grades]);
 
   // Ensure selectedDisciplineId exists in activeDisciplines
   useEffect(() => {
