@@ -1,83 +1,145 @@
-import React, { useState } from "react"
-import { Header } from "./components/layout/Header"
-import { Sidebar } from "./components/layout/Sidebar"
-import { MobileNav } from "./components/layout/MobileNav"
-import { ToastContainer } from "./components/ui/Toast"
+import React, { useState, useEffect, useMemo } from 'react';
+import { Header } from './components/layout/Header';
+import { Sidebar } from './components/layout/Sidebar';
+import { MobileNav } from './components/layout/MobileNav';
+import { ToastContainer } from './components/ui/Toast';
 
 // Feature components
-import { WelcomeBanner } from "./components/dashboard/WelcomeBanner"
-import { DeadlinesWidget } from "./components/dashboard/DeadlinesWidget"
-import { RecentGradesWidget } from "./components/dashboard/RecentGradesWidget"
-import { TodayScheduleWidget } from "./components/dashboard/TodayScheduleWidget"
+import { WelcomeBanner } from './components/dashboard/WelcomeBanner';
+import { DeadlinesWidget } from './components/dashboard/DeadlinesWidget';
+import { RecentGradesWidget } from './components/dashboard/RecentGradesWidget';
+import { TodayScheduleWidget } from './components/dashboard/TodayScheduleWidget';
 
-import { DisciplineSelector } from "./components/grades/DisciplineSelector"
-import { GradesTable } from "./components/grades/GradesTable"
-import { GradeDynamicChart } from "./components/grades/GradeDynamicChart"
+import { DisciplineSelector } from './components/grades/DisciplineSelector';
+import { GradesTable } from './components/grades/GradesTable';
+import { GradeDynamicChart } from './components/grades/GradeDynamicChart';
 
-import { ScheduleWeekMatrix } from "./components/schedule/ScheduleWeekMatrix"
-import { FinancesView } from "./components/finances/FinancesView"
+import { ScheduleWeekMatrix } from './components/schedule/ScheduleWeekMatrix';
+import { FinancesView } from './components/finances/FinancesView';
 
-import { StudentAcademicCard } from "./components/profile/StudentAcademicCard"
-import { TranscriptTable } from "./components/profile/TranscriptTable"
-import { CertificateOrderModal } from "./components/profile/CertificateOrderModal"
+import { StudentAcademicCard } from './components/profile/StudentAcademicCard';
+import { TranscriptTable } from './components/profile/TranscriptTable';
+import { CertificateOrderModal } from './components/profile/CertificateOrderModal';
+import { LoginModal } from './components/auth/LoginModal';
 
-// Mock data & Hooks
-import { MOCK_STUDENT } from "./data/mockStudent"
-import { MOCK_DISCIPLINES, MOCK_TRANSCRIPT } from "./data/mockGrades"
-import { MOCK_SCHEDULE } from "./data/mockSchedule"
+// Mock data & Hooks & Context
+import { MOCK_STUDENT } from './data/mockStudent';
+import { MOCK_DISCIPLINES, MOCK_TRANSCRIPT } from './data/mockGrades';
+import { MOCK_SCHEDULE } from './data/mockSchedule';
+import { StudentProfile } from './types/student';
+import { DisciplineGrades } from './types/grades';
 
-import { useClipboard } from "./hooks/useClipboard"
-import { useToast } from "./hooks/useToast"
+import { useClipboard } from './hooks/useClipboard';
+import { useToast } from './hooks/useToast';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
-export default function App() {
-  const [activeTab, setActiveTab] = useState<string>("dashboard")
+function UniHubMain() {
+  const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [selectedDisciplineId, setSelectedDisciplineId] = useState<string>(
-    MOCK_DISCIPLINES[0].id,
-  )
-  const [isCertModalOpen, setIsCertModalOpen] = useState(false)
+    MOCK_DISCIPLINES[0].id
+  );
+  const [isCertModalOpen, setIsCertModalOpen] = useState(false);
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
-  const { copy, isCopied } = useClipboard()
-  const { toasts, addToast, removeToast } = useToast()
+  const { user, isLoggedIn, courses, grades } = useAuth();
+  const { copy, isCopied } = useClipboard();
+  const { toasts, addToast, removeToast } = useToast();
+
+  // Construct student profile: verified user data if logged in, otherwise mock student
+  const currentStudent: StudentProfile = useMemo(() => {
+    if (isLoggedIn && user) {
+      return {
+        ...MOCK_STUDENT,
+        id: user.id || 'usr-live-01',
+        name: user.name || user.email.split('@')[0],
+        email: user.email,
+        studentCardNumber: user.moodleId
+          ? `ХНУ-МД-${user.moodleId}`
+          : MOCK_STUDENT.studentCardNumber,
+      };
+    }
+    return MOCK_STUDENT;
+  }, [isLoggedIn, user]);
+
+  // Convert live Moodle courses and grades to disciplines
+  const activeDisciplines: DisciplineGrades[] = useMemo(() => {
+    if (isLoggedIn && courses.length > 0) {
+      return courses.map((c) => {
+        const liveGradeObj = grades.find((g) => g.courseid === c.id);
+        const parsedGrade = liveGradeObj?.grade ? parseFloat(liveGradeObj.grade) : null;
+        const currentGrade = parsedGrade && !isNaN(parsedGrade) ? parsedGrade : 85;
+
+        return {
+          id: String(c.id),
+          name: c.fullname,
+          code: c.shortname || `CS-${c.id}`,
+          department: 'ННІ комп’ютерних наук',
+          instructor: 'Викладач курсу Moodle',
+          credits: 4,
+          controlType: 'Іспит' as const,
+          currentGrade,
+          maxGrade: 100,
+          averageGrade: 88,
+          tasks: MOCK_DISCIPLINES[0].tasks.map((t) => ({
+            ...t,
+            score: Math.min(t.maxScore, Math.round((currentGrade / 100) * t.maxScore)),
+          })),
+        };
+      });
+    }
+    return MOCK_DISCIPLINES;
+  }, [isLoggedIn, courses, grades]);
+
+  // Ensure selectedDisciplineId exists in activeDisciplines
+  useEffect(() => {
+    if (
+      activeDisciplines.length > 0 &&
+      !activeDisciplines.some((d) => d.id === selectedDisciplineId)
+    ) {
+      setSelectedDisciplineId(activeDisciplines[0].id);
+    }
+  }, [activeDisciplines, selectedDisciplineId]);
 
   const currentDiscipline =
-    MOCK_DISCIPLINES.find((d) => d.id === selectedDisciplineId) ||
-    MOCK_DISCIPLINES[0]
+    activeDisciplines.find((d) => d.id === selectedDisciplineId) ||
+    activeDisciplines[0];
 
   const handleCopy = async (text: string, label: string) => {
-    const success = await copy(text)
+    const success = await copy(text);
     if (success) {
       addToast({
-        type: "success",
-        title: "Успішно скопійовано",
+        type: 'success',
+        title: 'Успішно скопійовано',
         message: `${label} додано в буфер обміну.`,
-      })
+      });
     }
-  }
+  };
 
   const getPageTitle = () => {
     switch (activeTab) {
-      case "dashboard":
-        return "Головна панель (Дашборд)"
-      case "grades":
-        return "Журнал оцінок та аналітика успішності"
-      case "schedule":
-        return "Розклад навчальних занять"
-      case "finances":
-        return "Фінанси, стипендія та реквізити"
-      case "profile":
-        return "Профіль студента та електронний деканат"
+      case 'dashboard':
+        return 'Головна панель (Дашборд)';
+      case 'grades':
+        return 'Журнал оцінок та аналітика успішності';
+      case 'schedule':
+        return 'Розклад навчальних занять';
+      case 'finances':
+        return 'Фінанси, стипендія та реквізити';
+      case 'profile':
+        return 'Профіль студента та електронний деканат';
       default:
-        return "UniHub Студентський кабінет"
+        return 'UniHub Студентський кабінет';
     }
-  }
+  };
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[var(--kz-bg)] text-[var(--kz-text-primary)] transition-colors">
       {/* Top Header */}
       <Header
-        student={MOCK_STUDENT}
+        student={currentStudent}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onOpenLogin={() => setIsLoginModalOpen(true)}
         unreadNotificationsCount={3}
       />
 
@@ -102,16 +164,16 @@ export default function App() {
             </div>
 
             {/* TAB 1: DASHBOARD */}
-            {activeTab === "dashboard" && (
+            {activeTab === 'dashboard' && (
               <div className="space-y-5 animate-in fade-in duration-200">
-                <WelcomeBanner student={MOCK_STUDENT} />
+                <WelcomeBanner student={currentStudent} />
 
                 {/* 3 Widgets Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <DeadlinesWidget />
                   <TodayScheduleWidget />
                   <RecentGradesWidget
-                    onOpenGrades={() => setActiveTab("grades")}
+                    onOpenGrades={() => setActiveTab('grades')}
                   />
                 </div>
 
@@ -126,13 +188,13 @@ export default function App() {
             )}
 
             {/* TAB 2: GRADES */}
-            {activeTab === "grades" && (
+            {activeTab === 'grades' && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div className="grid grid-cols-1 lg:grid-cols-4 gap-5">
                   {/* Left disciplines selector */}
                   <div className="lg:col-span-1">
                     <DisciplineSelector
-                      disciplines={MOCK_DISCIPLINES}
+                      disciplines={activeDisciplines}
                       selectedId={selectedDisciplineId}
                       onSelect={setSelectedDisciplineId}
                     />
@@ -142,14 +204,14 @@ export default function App() {
                   <div className="lg:col-span-3 space-y-4">
                     <div className="p-4 rounded-[var(--kz-radius-lg)] bg-[var(--kz-surface)] border border-[var(--kz-border)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <span className="text-[10px] font-mono font-bold text-[var(--kz-brand-primary)] dark:text-[#60A5FA] bg-[var(--kz-brand-light)] dark:bg-[rgba(0,82,204,0.15)] px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono font-bold text-[var(--kz-brand-primary)] bg-[var(--kz-brand-light)] px-2 py-0.5 rounded">
                           {currentDiscipline.code}
                         </span>
                         <h2 className="text-base font-bold text-[var(--kz-text-primary)] mt-1">
                           {currentDiscipline.name}
                         </h2>
                         <p className="text-xs text-[var(--kz-text-secondary)] mt-0.5">
-                          {currentDiscipline.department} ·{" "}
+                          {currentDiscipline.department} ·{' '}
                           {currentDiscipline.instructor}
                         </p>
                       </div>
@@ -180,14 +242,14 @@ export default function App() {
             )}
 
             {/* TAB 3: SCHEDULE */}
-            {activeTab === "schedule" && (
+            {activeTab === 'schedule' && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <ScheduleWeekMatrix schedule={MOCK_SCHEDULE} />
               </div>
             )}
 
             {/* TAB 4: FINANCES (Бюджет + Контракт) */}
-            {activeTab === "finances" && (
+            {activeTab === 'finances' && (
               <FinancesView
                 initialMode="budget"
                 onCopy={handleCopy}
@@ -196,10 +258,10 @@ export default function App() {
             )}
 
             {/* TAB 5: PROFILE & E-DEAN */}
-            {activeTab === "profile" && (
+            {activeTab === 'profile' && (
               <div className="space-y-5 animate-in fade-in duration-200">
                 <StudentAcademicCard
-                  student={MOCK_STUDENT}
+                  student={currentStudent}
                   onOrderCertificate={() => setIsCertModalOpen(true)}
                 />
                 <TranscriptTable items={MOCK_TRANSCRIPT} />
@@ -216,11 +278,24 @@ export default function App() {
       <CertificateOrderModal
         isOpen={isCertModalOpen}
         onClose={() => setIsCertModalOpen(false)}
-        student={MOCK_STUDENT}
+        student={currentStudent}
+      />
+
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
 
       {/* Toast notifications container */}
       <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
-  )
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <UniHubMain />
+    </AuthProvider>
+  );
 }
