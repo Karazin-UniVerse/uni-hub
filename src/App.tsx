@@ -59,7 +59,7 @@ function UniHubMain() {
           department: 'Кафедра комп’ютерних наук',
           instructor: 'Викладач кафедри',
           credits: 4,
-          controlType: 'Екзамен' as const,
+          controlType: 'Іспит' as const,
           currentGrade: 85 + (idx % 10),
           maxGrade: 100,
           averageGrade: 88,
