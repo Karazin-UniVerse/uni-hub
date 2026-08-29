@@ -3,13 +3,24 @@ import { Calendar, Video, ArrowUpRight, Clock } from "lucide-react"
 import { Card } from "../ui/Card"
 import { Badge } from "../ui/Badge"
 import { useAuth } from "../../context/AuthContext"
+import { getPluralUk } from "../../utils/plural"
 
 export const TodayScheduleWidget: React.FC = () => {
   const { isLoggedIn, events } = useAuth()
 
   const liveEvents = useMemo(() => {
     if (isLoggedIn && events.length > 0) {
-      return events.slice(0, 3).map((ev) => {
+      const start = new Date()
+      start.setHours(0, 0, 0, 0)
+      const end = start.getTime() + 24 * 60 * 60 * 1000
+
+      const todays = events
+        .filter((ev) => ev.timestart * 1000 >= start.getTime() && ev.timestart * 1000 < end)
+        .sort((a, b) => a.timestart - b.timestart)
+
+      if (todays.length === 0) return null
+
+      return todays.slice(0, 3).map((ev) => {
         const date = new Date(ev.timestart * 1000)
         const timeStr = date.toLocaleTimeString("uk-UA", {
           hour: "2-digit",
@@ -36,7 +47,9 @@ export const TodayScheduleWidget: React.FC = () => {
           </h2>
         </div>
         <Badge variant="primary" size="sm">
-          {liveEvents ? `${liveEvents.length} події Moodle` : "Понеділок (3 пари)"}
+          {liveEvents
+            ? `${liveEvents.length} ${getPluralUk(liveEvents.length, "подія", "події", "подій")} Moodle`
+            : "Понеділок (3 пари)"}
         </Badge>
       </div>
 
@@ -81,7 +94,7 @@ export const TodayScheduleWidget: React.FC = () => {
       {/* Next lessons or live Moodle events */}
       <div className="space-y-2">
         <p className="text-[10px] font-bold text-[var(--kz-text-muted)] uppercase tracking-wider">
-          {liveEvents ? "Події календаря Moodle:" : "Наступні заняття:"}
+          {liveEvents ? "Події календаря Moodle на сьогодні:" : "Наступні заняття:"}
         </p>
 
         {liveEvents && liveEvents.length > 0 ? (

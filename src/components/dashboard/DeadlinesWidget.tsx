@@ -3,6 +3,7 @@ import { Clock, Calendar } from "lucide-react"
 import { Card } from "../ui/Card"
 import { Badge } from "../ui/Badge"
 import { useAuth } from "../../context/AuthContext"
+import { getPluralUk } from "../../utils/plural"
 
 export interface DeadlineItem {
   id: string
@@ -49,53 +50,59 @@ export const DeadlinesWidget: React.FC = () => {
       const now = Date.now()
       const courseMap = new Map(courses.map((c) => [c.id, c.fullname]))
 
-      return assignments
-        .filter((a) => a.duedate && a.duedate > 0)
+      const validAssignments = assignments.filter((a) => a.duedate && a.duedate > 0)
+      const upcoming = validAssignments
+        .filter((a) => a.duedate * 1000 >= now)
         .sort((a, b) => a.duedate - b.duedate)
-        .slice(0, 5)
-        .map((a) => {
-          const dueDateMs = a.duedate * 1000
-          const diffMs = dueDateMs - now
-          const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
-          const diffHours = Math.floor(
-            (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
-          )
+      const overdue = validAssignments
+        .filter((a) => a.duedate * 1000 < now)
+        .sort((a, b) => b.duedate - a.duedate)
 
-          let urgency: "high" | "medium" | "normal" = "normal"
-          let remainingText = `${diffDays} днів`
+      const sorted = [...upcoming, ...overdue].slice(0, 5)
 
-          if (diffMs <= 0) {
-            urgency = "high"
-            remainingText = "Термін минув"
-          } else if (diffDays < 3) {
-            urgency = "high"
-            remainingText =
-              diffDays === 0
-                ? `${diffHours} год`
-                : `${diffDays} дн ${diffHours} год`
-          } else if (diffDays < 7) {
-            urgency = "medium"
-            remainingText = `${diffDays} днів`
-          }
+      return sorted.map((a) => {
+        const dueDateMs = a.duedate * 1000
+        const diffMs = dueDateMs - now
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24))
+        const diffHours = Math.floor(
+          (diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+        )
 
-          const formattedDate = new Date(dueDateMs).toLocaleString("uk-UA", {
-            day: "2-digit",
-            month: "2-digit",
-            year: "numeric",
-            hour: "2-digit",
-            minute: "2-digit",
-          })
+        let urgency: "high" | "medium" | "normal" = "normal"
+        let remainingText = `${diffDays} днів`
 
-          return {
-            id: String(a.id),
-            title: a.name,
-            course: courseMap.get(a.course) || "Moodle курс",
-            deadline: formattedDate,
-            urgency,
-            remainingText,
-            url: `https://moodle.karazin.ua/mod/assign/view.php?id=${a.cmid}`,
-          }
+        if (diffMs <= 0) {
+          urgency = "high"
+          remainingText = "Термін минув"
+        } else if (diffDays < 3) {
+          urgency = "high"
+          remainingText =
+            diffDays === 0
+              ? `${diffHours} год`
+              : `${diffDays} дн ${diffHours} год`
+        } else if (diffDays < 7) {
+          urgency = "medium"
+          remainingText = `${diffDays} днів`
+        }
+
+        const formattedDate = new Date(dueDateMs).toLocaleString("uk-UA", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
         })
+
+        return {
+          id: String(a.id),
+          title: a.name,
+          course: courseMap.get(a.course) || "Moodle курс",
+          deadline: formattedDate,
+          urgency,
+          remainingText,
+          url: `https://moodle.karazin.ua/mod/assign/view.php?id=${a.cmid}`,
+        }
+      })
     }
     return MOCK_DEADLINES
   }, [isLoggedIn, assignments, courses])
@@ -110,7 +117,7 @@ export const DeadlinesWidget: React.FC = () => {
           </h2>
         </div>
         <Badge variant="primary" size="sm">
-          {deadlines.length} {deadlines.length === 1 ? "завдання" : "завдань"}
+          {deadlines.length} {getPluralUk(deadlines.length, "завдання", "завдання", "завдань")}
         </Badge>
       </div>
 

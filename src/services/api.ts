@@ -22,6 +22,7 @@ const API_BASE_URL =
 
 let isRefreshing = false;
 let refreshSubscribers: ((token: string) => void)[] = [];
+let refreshFailSubscribers: ((err: Error) => void)[] = [];
 
 function subscribeTokenRefresh(cb: (token: string) => void) {
   refreshSubscribers.push(cb);
@@ -29,6 +30,13 @@ function subscribeTokenRefresh(cb: (token: string) => void) {
 
 function onRefreshed(token: string) {
   refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+  refreshFailSubscribers = [];
+}
+
+function onRefreshFailed(err: Error) {
+  refreshFailSubscribers.forEach((cb) => cb(err));
+  refreshFailSubscribers = [];
   refreshSubscribers = [];
 }
 
@@ -38,7 +46,7 @@ async function request<T>(
   retries?: number
 ): Promise<{ data: T }> {
   const url = `${API_BASE_URL}${endpoint}`;
-  let token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -62,13 +70,8 @@ async function request<T>(
         credentials: 'include',
       });
 
-      // Handle 401 Unauthorized with token refresh (except for auth endpoints)
-      if (
-        response.status === 401 &&
-        endpoint !== '/auth/login' &&
-        endpoint !== '/auth/refresh' &&
-        typeof window !== 'undefined'
-      ) {
+      // Handle 401 Unauthorized with token refresh
+      if (response.status === 401 && endpoint !== '/auth/login' && endpoint !== '/auth/refresh') {
         if (!isRefreshing) {
           isRefreshing = true;
           try {
@@ -89,18 +92,20 @@ async function request<T>(
                 return request<T>(endpoint, { ...options, headers }, 0);
               }
             }
-          } catch {
-            // Refresh failed
+            throw new Error('Refresh response not ok or missing access_token');
+          } catch (err: unknown) {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('user');
+            onRefreshFailed(err instanceof Error ? err : new Error('Token refresh failed'));
+            throw err;
           } finally {
             isRefreshing = false;
           }
-          // If refresh failed, clear session
-          localStorage.removeItem('accessToken');
-          localStorage.removeItem('isLoggedIn');
-          localStorage.removeItem('user');
         } else {
           // Wait for token refresh and retry
           return new Promise<{ data: T }>((resolve, reject) => {
+            refreshFailSubscribers.push(reject);
             subscribeTokenRefresh((newToken: string) => {
               headers.Authorization = `Bearer ${newToken}`;
               request<T>(endpoint, { ...options, headers }, 0)

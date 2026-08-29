@@ -61,7 +61,12 @@ export const RecentGradesWidget: React.FC<{ onOpenGrades: () => void }> = ({
       const liveList: RecentGradeItem[] = grades
         .filter((g) => g.grade && g.grade.trim() !== "" && g.grade !== "-")
         .map((g) => {
-          const score = parseFloat(g.grade) || 0
+          // Clean localized comma decimals e.g. "85,50" -> 85.5
+          const normalized = String(g.grade).replace(",", ".")
+          const parsed = parseFloat(normalized)
+          if (isNaN(parsed) || !isFinite(parsed)) return null
+
+          const score = Math.max(0, Math.min(100, parsed))
           let ects = "A"
           if (score < 60) ects = "Fx"
           else if (score < 64) ects = "E"
@@ -78,6 +83,7 @@ export const RecentGradesWidget: React.FC<{ onOpenGrades: () => void }> = ({
             date: "Синхронізовано",
           }
         })
+        .filter((item): item is RecentGradeItem => item !== null)
 
       if (liveList.length > 0) {
         return liveList.slice(0, 4)
