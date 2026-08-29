@@ -1,10 +1,31 @@
-﻿import React from "react"
-import { Calendar, Video, MapPin, Clock, ArrowUpRight } from "lucide-react"
+import React, { useMemo } from "react"
+import { Calendar, Video, ArrowUpRight, Clock } from "lucide-react"
 import { Card } from "../ui/Card"
 import { Badge } from "../ui/Badge"
-import { Button } from "../ui/Button"
+import { useAuth } from "../../context/AuthContext"
 
 export const TodayScheduleWidget: React.FC = () => {
+  const { isLoggedIn, events } = useAuth()
+
+  const liveEvents = useMemo(() => {
+    if (isLoggedIn && events.length > 0) {
+      return events.slice(0, 3).map((ev) => {
+        const date = new Date(ev.timestart * 1000)
+        const timeStr = date.toLocaleTimeString("uk-UA", {
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+        return {
+          id: ev.id,
+          name: ev.name,
+          time: timeStr,
+          description: ev.description || "Подія в Moodle",
+        }
+      })
+    }
+    return null
+  }, [isLoggedIn, events])
+
   return (
     <Card className="flex flex-col h-full border-[var(--kz-border)]">
       <div className="flex items-center justify-between pb-3 border-b border-[var(--kz-border)] mb-3">
@@ -15,7 +36,7 @@ export const TodayScheduleWidget: React.FC = () => {
           </h2>
         </div>
         <Badge variant="primary" size="sm">
-          Понеділок (3 пари)
+          {liveEvents ? `${liveEvents.length} події Moodle` : "Понеділок (3 пари)"}
         </Badge>
       </div>
 
@@ -57,39 +78,63 @@ export const TodayScheduleWidget: React.FC = () => {
         </div>
       </div>
 
-      {/* Next lessons */}
+      {/* Next lessons or live Moodle events */}
       <div className="space-y-2">
         <p className="text-[10px] font-bold text-[var(--kz-text-muted)] uppercase tracking-wider">
-          Наступні заняття:
+          {liveEvents ? "Події календаря Moodle:" : "Наступні заняття:"}
         </p>
 
-        <div className="p-2.5 rounded-[var(--kz-radius-md)] bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] flex items-center justify-between text-xs">
-          <div>
-            <p className="font-semibold text-[var(--kz-text-primary)]">
-              Алгоритми (Лабораторне)
-            </p>
-            <p className="text-[11px] text-[var(--kz-text-secondary)]">
-              Комп’ютерний клас 4-12
-            </p>
-          </div>
-          <span className="font-mono font-bold text-[var(--kz-text-secondary)]">
-            10:15 – 11:50
-          </span>
-        </div>
+        {liveEvents && liveEvents.length > 0 ? (
+          liveEvents.map((ev) => (
+            <div
+              key={ev.id}
+              className="p-2.5 rounded-[var(--kz-radius-md)] bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] flex items-center justify-between text-xs"
+            >
+              <div className="min-w-0 pr-2">
+                <p className="font-semibold text-[var(--kz-text-primary)] truncate">
+                  {ev.name}
+                </p>
+                <p className="text-[11px] text-[var(--kz-text-secondary)] truncate">
+                  Календар Moodle
+                </p>
+              </div>
+              <span className="font-mono font-bold text-[var(--kz-text-secondary)] shrink-0 flex items-center gap-1">
+                <Clock size={11} />
+                {ev.time}
+              </span>
+            </div>
+          ))
+        ) : (
+          <>
+            <div className="p-2.5 rounded-[var(--kz-radius-md)] bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] flex items-center justify-between text-xs">
+              <div>
+                <p className="font-semibold text-[var(--kz-text-primary)]">
+                  Алгоритми (Лабораторне)
+                </p>
+                <p className="text-[11px] text-[var(--kz-text-secondary)]">
+                  Комп’ютерний клас 4-12
+                </p>
+              </div>
+              <span className="font-mono font-bold text-[var(--kz-text-secondary)]">
+                10:15 – 11:50
+              </span>
+            </div>
 
-        <div className="p-2.5 rounded-[var(--kz-radius-md)] bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] flex items-center justify-between text-xs">
-          <div>
-            <p className="font-semibold text-[var(--kz-text-primary)]">
-              Бази даних та ІС (Практичне)
-            </p>
-            <p className="text-[11px] text-[var(--kz-text-secondary)]">
-              Google Meet
-            </p>
-          </div>
-          <span className="font-mono font-bold text-[var(--kz-text-secondary)]">
-            12:10 – 13:45
-          </span>
-        </div>
+            <div className="p-2.5 rounded-[var(--kz-radius-md)] bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] flex items-center justify-between text-xs">
+              <div>
+                <p className="font-semibold text-[var(--kz-text-primary)]">
+                  Бази даних та ІС (Практичне)
+                </p>
+                <p className="text-[11px] text-[var(--kz-text-secondary)]">
+                  Google Meet
+                </p>
+              </div>
+              <span className="font-mono font-bold text-[var(--kz-text-secondary)]">
+                12:10 – 13:45
+              </span>
+            </div>
+          </>
+        )}
       </div>
     </Card>
   )

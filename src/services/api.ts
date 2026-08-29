@@ -20,13 +20,25 @@ const API_BASE_URL =
     ? 'https://p01--backend--jm9qjnmpm4m2.code.run'
     : 'http://localhost:3001');
 
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
   retries?: number
 ): Promise<{ data: T }> {
   const url = `${API_BASE_URL}${endpoint}`;
-  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  let token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
@@ -49,6 +61,55 @@ async function request<T>(
         headers,
         credentials: 'include',
       });
+
+      // Handle 401 Unauthorized with token refresh (except for auth endpoints)
+      if (
+        response.status === 401 &&
+        endpoint !== '/auth/login' &&
+        endpoint !== '/auth/refresh' &&
+        typeof window !== 'undefined'
+      ) {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+            });
+
+            if (refreshRes.ok) {
+              const refreshData = (await refreshRes.json()) as AuthResponse;
+              if (refreshData.access_token) {
+                localStorage.setItem('accessToken', refreshData.access_token);
+                onRefreshed(refreshData.access_token);
+                headers.Authorization = `Bearer ${refreshData.access_token}`;
+                isRefreshing = false;
+                // Retry the original request
+                return request<T>(endpoint, { ...options, headers }, 0);
+              }
+            }
+          } catch {
+            // Refresh failed
+          } finally {
+            isRefreshing = false;
+          }
+          // If refresh failed, clear session
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('isLoggedIn');
+          localStorage.removeItem('user');
+        } else {
+          // Wait for token refresh and retry
+          return new Promise<{ data: T }>((resolve, reject) => {
+            subscribeTokenRefresh((newToken: string) => {
+              headers.Authorization = `Bearer ${newToken}`;
+              request<T>(endpoint, { ...options, headers }, 0)
+                .then(resolve)
+                .catch(reject);
+            });
+          });
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
