@@ -26,7 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="h-14 bg-[var(--kz-topbar-bg)] border-b border-[var(--kz-topbar-border)] flex items-center justify-between px-4 sm:px-6 shrink-0 z-20 transition-colors shadow-xs">
       {/* Brand logo & portal title */}
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-[var(--kz-brand-primary)] flex items-center justify-center text-white shadow-sm shadow-blue-500/30 font-bold shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[var(--kz-brand-primary)] flex items-center justify-center text-white shadow-sm font-bold shrink-0">
           <GraduationCap size={20} />
         </div>
         <div className="flex items-center gap-2">
@@ -43,8 +43,8 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="hidden md:flex items-center gap-2 bg-[var(--kz-surface-hover)] border border-[var(--kz-border)] rounded-full px-3 py-1 text-xs text-[var(--kz-topbar-text)]">
         {isLoggedIn ? (
           <>
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-[var(--kz-success)] animate-pulse" />
+            <span className="font-medium text-[var(--kz-success)] flex items-center gap-1">
               <CheckCircle2 size={12} /> Moodle Live
             </span>
             <span className="text-[var(--kz-topbar-muted)]">·</span>
@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex items-center gap-2.5 pl-2 border-l border-[var(--kz-border)]">
           {isLoggedIn ? (
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full bg-[var(--kz-brand-light)] border border-[var(--kz-brand-primary)]/40 text-[var(--kz-brand-primary)] dark:text-[#60A5FA] flex items-center justify-center text-xs font-bold shrink-0">
+              <div className="w-8 h-8 rounded-full bg-[var(--kz-brand-light)] border border-[var(--kz-brand-primary)]/40 text-[var(--kz-brand-primary)] flex items-center justify-center text-xs font-bold shrink-0">
                 {user?.name ? user.name.slice(0, 2).toUpperCase() : 'РБ'}
               </div>
               <div className="hidden lg:block text-left">
@@ -95,7 +95,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
               <button
                 onClick={logout}
-                className="p-1.5 text-[var(--kz-text-muted)] hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors cursor-pointer"
+                className="p-1.5 text-[var(--kz-text-muted)] hover:text-[var(--kz-danger)] hover:bg-[var(--kz-danger)]/10 rounded-lg transition-colors cursor-pointer"
                 title="Вийти з акаунта"
               >
                 <LogOut size={16} />

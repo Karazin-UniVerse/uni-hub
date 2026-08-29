@@ -8,16 +8,22 @@ import type {
   MoodleCourseSection,
 } from '../types/api';
 
+const isLocal =
+  typeof window !== 'undefined' &&
+  (window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1' ||
+    window.location.hostname.startsWith('192.168.'));
+
 const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
-  (typeof window !== 'undefined' && window.location.hostname !== 'localhost'
+  (!isLocal
     ? 'https://p01--backend--jm9qjnmpm4m2.code.run'
     : 'http://localhost:3001');
 
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
-  retries = 2
+  retries?: number
 ): Promise<{ data: T }> {
   const url = `${API_BASE_URL}${endpoint}`;
   const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
@@ -31,8 +37,12 @@ async function request<T>(
     headers.Authorization = `Bearer ${token}`;
   }
 
+  // Only retry idempotent GET requests by default
+  const isGet = !options.method || options.method.toUpperCase() === 'GET';
+  const maxRetries = retries !== undefined ? retries : isGet ? 2 : 0;
+
   let attempt = 0;
-  while (attempt <= retries) {
+  while (attempt <= maxRetries) {
     try {
       const response = await fetch(url, {
         ...options,
@@ -44,10 +54,15 @@ async function request<T>(
         throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
       }
 
-      const data = (await response.json()) as T;
+      if (response.status === 204 || response.headers.get('content-length') === '0') {
+        return { data: undefined as unknown as T };
+      }
+
+      const text = await response.text();
+      const data = text ? (JSON.parse(text) as T) : (undefined as unknown as T);
       return { data };
     } catch (err) {
-      if (attempt < retries) {
+      if (attempt < maxRetries) {
         attempt++;
         const delay = attempt * 500;
         await new Promise((resolve) => setTimeout(resolve, delay));

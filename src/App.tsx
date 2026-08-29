@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Header } from './components/layout/Header';
 import { Sidebar } from './components/layout/Sidebar';
 import { MobileNav } from './components/layout/MobileNav';
@@ -66,6 +66,16 @@ function UniHubMain() {
           tasks: MOCK_DISCIPLINES[0].tasks,
         }))
       : MOCK_DISCIPLINES;
+
+  // Ensure selectedDisciplineId exists in activeDisciplines
+  useEffect(() => {
+    if (
+      activeDisciplines.length > 0 &&
+      !activeDisciplines.some((d) => d.id === selectedDisciplineId)
+    ) {
+      setSelectedDisciplineId(activeDisciplines[0].id);
+    }
+  }, [activeDisciplines, selectedDisciplineId]);
 
   const currentDiscipline =
     activeDisciplines.find((d) => d.id === selectedDisciplineId) ||
@@ -171,7 +181,7 @@ function UniHubMain() {
                   <div className="lg:col-span-3 space-y-4">
                     <div className="p-4 rounded-[var(--kz-radius-lg)] bg-[var(--kz-surface)] border border-[var(--kz-border)] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <span className="text-[10px] font-mono font-bold text-[var(--kz-brand-primary)] dark:text-[#60A5FA] bg-[var(--kz-brand-light)] dark:bg-[rgba(0,82,204,0.15)] px-2 py-0.5 rounded">
+                        <span className="text-[10px] font-mono font-bold text-[var(--kz-brand-primary)] bg-[var(--kz-brand-light)] px-2 py-0.5 rounded">
                           {currentDiscipline.code}
                         </span>
                         <h2 className="text-base font-bold text-[var(--kz-text-primary)] mt-1">

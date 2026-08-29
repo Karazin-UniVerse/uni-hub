@@ -29,10 +29,11 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
     try {
       await login(emailOrLogin, password);
       onClose();
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(
-        err.message ||
-          'Помилка авторизації. Перевірте правильність логіна або пароля Moodle.'
+        err instanceof Error
+          ? err.message
+          : 'Помилка авторизації. Перевірте правильність логіна або пароля Moodle.'
       );
     } finally {
       setLoading(false);
@@ -40,8 +41,8 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleFillDemo = () => {
-    setEmailOrLogin('r.barsukov');
-    setPassword('UniverseAdmin2026!');
+    setEmailOrLogin('student@student.karazin.ua');
+    setPassword('');
     setError(null);
   };
 
@@ -95,7 +96,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
               <motion.div
                 initial={{ opacity: 0, y: -8 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2"
+                className="p-3 rounded-lg bg-[var(--kz-danger)]/10 border border-[var(--kz-danger)]/20 text-[var(--kz-danger)] text-xs flex items-center gap-2"
               >
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{error}</span>
@@ -110,7 +111,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--kz-text-muted)]" />
                 <input
                   type="text"
-                  placeholder="r.barsukov або student@student.karazin.ua"
+                  placeholder="student@student.karazin.ua або логін Moodle"
                   value={emailOrLogin}
                   onChange={(e) => setEmailOrLogin(e.target.value)}
                   className="w-full pl-9 pr-4 py-2.5 rounded-lg bg-[var(--kz-bg)] border border-[var(--kz-border)] text-sm text-[var(--kz-text-primary)] placeholder:text-[var(--kz-text-muted)] focus:outline-hidden focus:border-[var(--kz-brand-primary)] focus:ring-1 focus:ring-[var(--kz-brand-primary)] transition-colors"
@@ -159,7 +160,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 className="w-full py-2 px-3 rounded-lg bg-[var(--kz-surface-hover)] hover:bg-[var(--kz-border)] text-[var(--kz-text-secondary)] hover:text-[var(--kz-text-primary)] font-medium text-xs border border-[var(--kz-border)] transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                <span>Заповнити тестовими обліковими даними</span>
+                <span>Заповнити шаблон логіна</span>
               </button>
             </div>
           </form>
