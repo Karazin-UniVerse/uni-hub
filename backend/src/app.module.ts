@@ -7,6 +7,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MoodleModule } from './moodle/moodle.module';
+import { CertificatesModule } from './certificates/certificates.module';
 import { AtGuard } from './auth/guards/at.guard';
 
 @Module({
@@ -16,6 +17,7 @@ import { AtGuard } from './auth/guards/at.guard';
     UserModule,
     AuthModule,
     MoodleModule,
+    CertificatesModule,
   ],
   controllers: [AppController],
   providers: [
