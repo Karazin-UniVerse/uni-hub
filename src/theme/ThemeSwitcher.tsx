@@ -4,7 +4,7 @@ import { useTheme, type AppTheme } from './ThemeContext';
 import clsx from 'clsx';
 
 const THEME_META: Record<AppTheme, { label: string; icon: React.ReactNode; color: string }> = {
-  light: { label: 'Світла', icon: <Sun size={15} />, color: 'text-amber-400' },
+  light: { label: 'Світла', icon: <Sun size={15} />, color: 'text-amber-500' },
   dark: { label: 'Темна', icon: <Moon size={15} />, color: 'text-blue-400' },
   cyberpunk: { label: 'Cyberpunk', icon: <Zap size={15} />, color: 'text-[#00F0FF]' },
 };
@@ -24,14 +24,14 @@ export const ThemeSwitcher: React.FC<ThemeSwitcherProps> = ({ compact = false, c
         type="button"
         onClick={cycleTheme}
         className={clsx(
-          'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-semibold transition-all cursor-pointer border border-white/10 shadow-xs select-none',
+          'flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[var(--kz-surface-hover)] hover:bg-[var(--kz-surface-active)] text-[var(--kz-text-primary)] text-xs font-semibold transition-all cursor-pointer border border-[var(--kz-border)] shadow-xs select-none',
           className
         )}
         title={`Поточна тема: ${meta.label}. Натисніть для перемикання`}
         aria-label="Перемикач теми"
       >
         <span className={meta.color}>{meta.icon}</span>
-        <span className="text-[11px] tracking-wide">{meta.label}</span>
+        <span className="text-[11px] tracking-wide font-medium">{meta.label}</span>
       </button>
     );
   }

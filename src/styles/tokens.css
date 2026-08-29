@@ -8,10 +8,20 @@
   --kz-surface: #FFFFFF;
   --kz-surface-hover: #F1F3F5;
   --kz-surface-active: #E9ECEF;
-  --kz-sidebar-bg: #1C1C1E;
-  --kz-sidebar-hover: #2C2C2E;
+
+  /* Header & Sidebar Light Theme */
+  --kz-topbar-bg: #FFFFFF;
+  --kz-topbar-border: #E5E7EB;
+  --kz-topbar-text: #111827;
+  --kz-topbar-muted: #6B7280;
+
+  --kz-sidebar-bg: #FFFFFF;
+  --kz-sidebar-hover: #F1F3F5;
   --kz-sidebar-active: #0052CC;
-  --kz-topbar-bg: #2A2A2C;
+  --kz-sidebar-text: #4B5563;
+  --kz-sidebar-text-hover: #111827;
+  --kz-sidebar-text-muted: #9CA3AF;
+  --kz-sidebar-border: #E5E7EB;
 
   --kz-border: #E5E7EB;
   --kz-border-strong: #D1D5DB;
@@ -63,10 +73,20 @@
   --kz-surface: #151921;
   --kz-surface-hover: #1E232E;
   --kz-surface-active: #282E3C;
+
+  /* Header & Sidebar Dark Theme */
+  --kz-topbar-bg: #151921;
+  --kz-topbar-border: #232936;
+  --kz-topbar-text: #F3F4F6;
+  --kz-topbar-muted: #9CA3AF;
+
   --kz-sidebar-bg: #0E121A;
   --kz-sidebar-hover: #1C222E;
   --kz-sidebar-active: #3466E7;
-  --kz-topbar-bg: #151921;
+  --kz-sidebar-text: #9CA3AF;
+  --kz-sidebar-text-hover: #F3F4F6;
+  --kz-sidebar-text-muted: #6B7280;
+  --kz-sidebar-border: #232936;
 
   --kz-border: #232936;
   --kz-border-strong: #323A4C;
@@ -103,10 +123,20 @@
   --kz-surface: #111420;
   --kz-surface-hover: #191E30;
   --kz-surface-active: #242B42;
+
+  /* Header & Sidebar Cyberpunk Theme */
+  --kz-topbar-bg: #111420;
+  --kz-topbar-border: rgba(0, 240, 255, 0.25);
+  --kz-topbar-text: #00F0FF;
+  --kz-topbar-muted: #7E8BA5;
+
   --kz-sidebar-bg: #06070B;
   --kz-sidebar-hover: #151A2C;
   --kz-sidebar-active: #00F0FF;
-  --kz-topbar-bg: #111420;
+  --kz-sidebar-text: #7E8BA5;
+  --kz-sidebar-text-hover: #00F0FF;
+  --kz-sidebar-text-muted: #4F5B73;
+  --kz-sidebar-border: rgba(0, 240, 255, 0.25);
 
   --kz-border: rgba(0, 240, 255, 0.25);
   --kz-border-strong: rgba(255, 0, 85, 0.45);
