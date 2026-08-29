@@ -13,6 +13,10 @@ interface MoodleUserIdResponse {
 
 @Injectable()
 export class GetCreds {
+  private readonly baseUrl =
+    process.env.MOODLE_BASEURL || 'https://moodle.karazin.ua';
+  private readonly timeout = Number(process.env.MOODLE_TIMEOUT) || 10000;
+
   async getToken(email: string, password: string): Promise<string> {
     if (!email || !password) {
       throw new Error('Email and password are required');
@@ -24,12 +28,13 @@ export class GetCreds {
       service: 'moodle_mobile_app',
     });
 
-    const response = await fetch('https://moodle.karazin.ua/login/token.php', {
+    const response = await fetch(`${this.baseUrl}/login/token.php`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: body.toString(),
+      signal: AbortSignal.timeout(this.timeout),
     });
 
     const text = await response.text();
@@ -50,7 +55,10 @@ export class GetCreds {
     }
 
     const response = await fetch(
-      `https://moodle.karazin.ua/webservice/rest/server.php?wstoken=${encodeURIComponent(token)}&wsfunction=core_webservice_get_site_info&moodlewsrestformat=json`,
+      `${this.baseUrl}/webservice/rest/server.php?wstoken=${encodeURIComponent(token)}&wsfunction=core_webservice_get_site_info&moodlewsrestformat=json`,
+      {
+        signal: AbortSignal.timeout(this.timeout),
+      },
     );
 
     const data = (await response.json()) as MoodleUserIdResponse;

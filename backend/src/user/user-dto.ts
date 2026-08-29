@@ -1,5 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
   @ApiProperty()
@@ -21,20 +21,30 @@ export class CreateUserDto {
 }
 
 export class UpdateUserDto {
-  @ApiProperty()
-  moodleId: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  moodleId?: string;
 
-  @ApiProperty()
-  token: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  token?: string;
 
-  @ApiProperty()
-  password: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  password?: string;
 
-  @ApiProperty()
-  email: string;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsEmail()
+  email?: string;
 
-  @ApiProperty()
-  refreshToken: string | null;
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  refreshToken?: string | null;
 }
 
 export class UserResponseDto {

@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
   InternalServerErrorException,
   RequestTimeoutException,
@@ -75,6 +76,9 @@ export class MoodleClientService {
 
       return data;
     } catch (e) {
+      if (e instanceof HttpException) {
+        throw e;
+      }
       if (e instanceof Error && e.name === 'TimeoutError') {
         throw new RequestTimeoutException('Moodle request timeout');
       }
