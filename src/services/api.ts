@@ -20,6 +20,26 @@ const API_BASE_URL =
     ? 'https://p01--backend--jm9qjnmpm4m2.code.run'
     : 'http://localhost:3001');
 
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+let refreshFailSubscribers: ((err: Error) => void)[] = [];
+
+function subscribeTokenRefresh(cb: (token: string) => void) {
+  refreshSubscribers.push(cb);
+}
+
+function onRefreshed(token: string) {
+  refreshSubscribers.forEach((cb) => cb(token));
+  refreshSubscribers = [];
+  refreshFailSubscribers = [];
+}
+
+function onRefreshFailed(err: Error) {
+  refreshFailSubscribers.forEach((cb) => cb(err));
+  refreshFailSubscribers = [];
+  refreshSubscribers = [];
+}
+
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
@@ -49,6 +69,52 @@ async function request<T>(
         headers,
         credentials: 'include',
       });
+
+      // Handle 401 Unauthorized with token refresh
+      if (response.status === 401 && endpoint !== '/auth/login' && endpoint !== '/auth/refresh') {
+        if (!isRefreshing) {
+          isRefreshing = true;
+          try {
+            const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+            });
+
+            if (refreshRes.ok) {
+              const refreshData = (await refreshRes.json()) as AuthResponse;
+              if (refreshData.access_token) {
+                localStorage.setItem('accessToken', refreshData.access_token);
+                onRefreshed(refreshData.access_token);
+                headers.Authorization = `Bearer ${refreshData.access_token}`;
+                isRefreshing = false;
+                // Retry the original request
+                return request<T>(endpoint, { ...options, headers }, 0);
+              }
+            }
+            throw new Error('Refresh response not ok or missing access_token');
+          } catch (err: unknown) {
+            localStorage.removeItem('accessToken');
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('user');
+            onRefreshFailed(err instanceof Error ? err : new Error('Token refresh failed'));
+            throw err;
+          } finally {
+            isRefreshing = false;
+          }
+        } else {
+          // Wait for token refresh and retry
+          return new Promise<{ data: T }>((resolve, reject) => {
+            refreshFailSubscribers.push(reject);
+            subscribeTokenRefresh((newToken: string) => {
+              headers.Authorization = `Bearer ${newToken}`;
+              request<T>(endpoint, { ...options, headers }, 0)
+                .then(resolve)
+                .catch(reject);
+            });
+          });
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`HTTP error ${response.status}: ${response.statusText}`);
@@ -142,4 +208,60 @@ export const moodleApi = {
     }),
 };
 
-export default { request, authApi, moodleApi };
+export interface OrderCertificateDto {
+  type: string;
+  purpose: string;
+  deliveryType?: 'digital_pdf' | 'physical_dean';
+}
+
+export interface CertificateResponse {
+  id: string;
+  type: string;
+  purpose: string;
+  deliveryType: string;
+  status: string;
+  verificationCode: string;
+  pdfUrl?: string;
+  createdAt: string;
+}
+
+export interface PaymentTransactionResponse {
+  id: string;
+  amount: number;
+  purpose: string;
+  status: string;
+  recipientIban: string;
+  paidAt?: string;
+  createdAt: string;
+}
+
+export interface ScholarshipRecordResponse {
+  id: string;
+  month: number;
+  year: number;
+  type: string;
+  amount: number;
+  status: string;
+  paidAt?: string;
+}
+
+export const certificatesApi = {
+  order: (data: OrderCertificateDto) =>
+    request<CertificateResponse>('/certificates/order', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+  getMyCertificates: () =>
+    request<CertificateResponse[]>('/certificates/my'),
+  getById: (id: string) =>
+    request<CertificateResponse>(`/certificates/${id}`),
+};
+
+export const financesApi = {
+  getPayments: () =>
+    request<PaymentTransactionResponse[]>('/finances/payments'),
+  getScholarships: () =>
+    request<ScholarshipRecordResponse[]>('/finances/scholarships'),
+};
+
+export default { request, authApi, moodleApi, certificatesApi, financesApi };

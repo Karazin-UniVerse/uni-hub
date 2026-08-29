@@ -1,4 +1,4 @@
-﻿import React from "react"
+import React from "react"
 import {
   Award,
   BookOpen,
@@ -84,12 +84,15 @@ export const StudentAcademicCard: React.FC<StudentAcademicCardProps> = ({
             <p className="text-xs text-[var(--kz-text-secondary)] mt-0.5 font-mono">
               {student.email}
             </p>
-            <div className="flex items-center gap-2 mt-2">
-              <span className="text-[11px] font-semibold bg-[var(--kz-brand-light)] text-[var(--kz-brand-hover)] dark:bg-[rgba(0,82,204,0.15)] dark:text-[#60A5FA] px-2 py-0.5 rounded">
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <span className="text-[11px] font-semibold bg-[var(--kz-brand-light)] text-[var(--kz-brand-primary)] px-2 py-0.5 rounded">
                 Курс {student.course} · Семестр {student.semester}
               </span>
               <span className="text-[11px] font-semibold bg-[var(--kz-surface-hover)] text-[var(--kz-text-secondary)] px-2 py-0.5 rounded border border-[var(--kz-border)]">
                 {student.group}
+              </span>
+              <span className="text-[11px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-0.5 rounded border border-amber-500/20 flex items-center gap-1">
+                <Award size={12} /> Стипендіальний бал: {student.ratingScore ?? student.gpa} / 100
               </span>
             </div>
           </div>

@@ -1,0 +1,213 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  USER
+  STUDENT
+  INSTRUCTOR
+  DEAN_OFFICE
+  ADMIN
+}
+
+enum AcademicDegree {
+  BACHELOR
+  MASTER
+  PHD
+}
+
+enum StudyForm {
+  FULL_TIME
+  PART_TIME
+  DISTANCE
+}
+
+enum PaymentType {
+  BUDGET
+  CONTRACT
+}
+
+enum CertificateType {
+  STUDY_CONFIRMATION
+  CONSCRIPTION_DEFERRAL
+  ACADEMIC_TRANSCRIPT
+  INCOME_STATEMENT
+}
+
+enum CertificateDeliveryType {
+  DIGITAL_PDF
+  PHYSICAL_DEAN
+}
+
+enum CertificateStatus {
+  PENDING
+  IN_PROGRESS
+  SIGNED
+  READY
+  REJECTED
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum ScholarshipType {
+  ACADEMIC_STANDARD
+  ACADEMIC_INCREASED
+  SOCIAL
+  PRESIDENTIAL
+}
+
+enum ScholarshipStatus {
+  ACCRUED
+  PAID
+  CANCELLED
+}
+
+model User {
+  id           String       @id @default(uuid())
+  email        String       @unique
+  name         String?
+  password     String
+  role         Role         @default(STUDENT)
+  token        String?
+  moodleId     String?
+  refreshToken String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  studentProfile      StudentProfile?
+  courses             Course[]             @relation("CourseInstructors")
+  enrollments         Enrollment[]
+  certificateRequests CertificateRequest[]
+  paymentTransactions PaymentTransaction[]
+  scholarshipRecords  ScholarshipRecord[]
+}
+
+model StudentProfile {
+  id                String          @id @default(uuid())
+  userId            String          @unique
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  university        String          @default("V. N. Karazin Kharkiv National University")
+  faculty           String          @default("Institute of Computer Science and AI")
+  specialty         String          @default("Computer Science")
+  specialtyCode     String          @default("122")
+  degree            AcademicDegree  @default(BACHELOR)
+  group             String          @default("CS-12")
+  course            Int             @default(3)
+  semester          Int             @default(6)
+  studyForm         StudyForm       @default(FULL_TIME)
+  paymentType       PaymentType     @default(BUDGET)
+  
+  studentCardNumber String?
+  recordBookNumber  String?
+  ratingScore       Float           @default(0.0)
+  totalCredits      Int             @default(240)
+  completedCredits  Int             @default(0)
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Course {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  isPublished Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  instructorId String
+  instructor   User    @relation("CourseInstructors", fields: [instructorId], references: [id])
+  
+  enrollments  Enrollment[]
+}
+
+model Enrollment {
+  id        String   @id @default(uuid())
+  userId    String
+  courseId  String
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model CertificateRequest {
+  id               String                  @id @default(uuid())
+  userId           String
+  user             User                    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type             CertificateType         @default(STUDY_CONFIRMATION)
+  purpose          String
+  deliveryType     CertificateDeliveryType @default(DIGITAL_PDF)
+  status           CertificateStatus       @default(PENDING)
+  
+  verificationCode String                  @unique @default(uuid())
+  pdfUrl           String?
+  rejectionReason  String?
+  
+  processedBy      String?
+  processedAt      DateTime?
+
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  @@index([userId])
+  @@index([verificationCode])
+  @@index([status])
+}
+
+model PaymentTransaction {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  amount        Float
+  purpose       String
+  status        PaymentStatus @default(PENDING)
+  
+  recipientName String        @default("Karazin University")
+  recipientIban String        @default("UA123456789012345678901234567")
+  edrpou        String        @default("02071205")
+  receiptUrl    String?
+  paidAt        DateTime?
+
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([status])
+}
+
+model ScholarshipRecord {
+  id           String            @id @default(uuid())
+  userId       String
+  user         User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  month        Int
+  year         Int
+  type         ScholarshipType   @default(ACADEMIC_STANDARD)
+  amount       Float
+  status       ScholarshipStatus @default(ACCRUED)
+  
+  bankCardMask String?
+  paidAt       DateTime?
+
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  @@unique([userId, month, year, type])
+  @@index([userId])
+}
