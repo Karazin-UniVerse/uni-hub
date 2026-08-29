@@ -14,7 +14,8 @@
         "dev:backend": "pnpm --prefix backend start:dev",
         "build:backend": "pnpm --prefix backend build",
         "test:backend": "pnpm --prefix backend test",
-        "db:generate": "pnpm --prefix backend db:generate"
+        "db:generate": "pnpm --prefix backend db:generate",
+        "db:seed": "pnpm --prefix backend db:seed"
     },
     "dependencies": {
         "canvas-confetti": "^1.9.4",
