@@ -25,11 +25,15 @@ export class FinancesService {
       where: { userId },
     });
 
-    const isBudget = profile?.paymentType !== PaymentType.CONTRACT;
-    const isHighRank = (profile?.ratingScore ?? 0) >= 85.0;
+    if (!profile) {
+      throw new NotFoundException('Student profile not found');
+    }
+
+    const isBudget = profile.paymentType !== PaymentType.CONTRACT;
+    const isHighRank = profile.ratingScore >= 85.0;
 
     return {
-      paymentType: profile?.paymentType || PaymentType.BUDGET,
+      paymentType: profile.paymentType,
       isScholarshipAssigned: isBudget && isHighRank,
       monthlyScholarshipAmount: isBudget && isHighRank ? 2000.0 : 0.0,
       debtAmount: 0.0,

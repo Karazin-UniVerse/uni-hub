@@ -78,6 +78,13 @@ describe('FinancesService', () => {
     expect(res.universityEdrpou).toBe('02071205');
   });
 
+  it('should throw NotFoundException if profile is missing in getOverview', async () => {
+    mockPrisma.studentProfile.findUnique.mockResolvedValueOnce(null);
+    await expect(service.getOverview('user-no-profile')).rejects.toThrow(
+      NotFoundException,
+    );
+  });
+
   it('should get scholarships history', async () => {
     const res = await service.getScholarships('user-1');
     expect(res).toHaveLength(1);
