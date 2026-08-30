@@ -71,4 +71,13 @@ describe('StudentProfileService', () => {
     expect(res).toBeDefined();
     expect(mockPrisma.studentProfile.upsert).toHaveBeenCalled();
   });
+
+  it('should reject update if completedCredits exceeds totalCredits', async () => {
+    await expect(
+      service.updateProfile('user-1', {
+        completedCredits: 300,
+        totalCredits: 240,
+      }),
+    ).rejects.toThrow();
+  });
 });

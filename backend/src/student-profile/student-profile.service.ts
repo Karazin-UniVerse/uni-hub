@@ -1,6 +1,7 @@
 import {
   Injectable,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { UpdateStudentProfileDto } from './dto/update-student-profile.dto';
@@ -43,34 +44,31 @@ export class StudentProfileService {
   async getProfile(userId: string): Promise<StudentProfileResponseDto> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      include: { studentProfile: true },
     });
 
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    if (!user.studentProfile) {
-      // Auto-create initial profile for the student if not exists
-      const createdProfile = await this.prisma.studentProfile.create({
-        data: {
-          userId,
-          university: 'Харківський національний університет імені В. Н. Каразіна',
-          faculty: 'ННІ комп’ютерних наук та штучного інтелекту',
-          specialty: '122 Комп’ютерні науки',
-          specialtyCode: '122',
-          group: 'КС-12',
-          course: 2,
-          semester: 4,
-          ratingScore: 88.5,
-          totalCredits: 240,
-          completedCredits: 90,
-        },
-      });
-      return this.toResponseDto(createdProfile, user);
-    }
+    const profile = await this.prisma.studentProfile.upsert({
+      where: { userId },
+      update: {},
+      create: {
+        userId,
+        university: 'Харківський національний університет імені В. Н. Каразіна',
+        faculty: 'ННІ комп’ютерних наук та штучного інтелекту',
+        specialty: '122 Комп’ютерні науки',
+        specialtyCode: '122',
+        group: 'КС-12',
+        course: 2,
+        semester: 4,
+        ratingScore: 88.5,
+        totalCredits: 240,
+        completedCredits: 90,
+      },
+    });
 
-    return this.toResponseDto(user.studentProfile, user);
+    return this.toResponseDto(profile, user);
   }
 
   async updateProfile(
@@ -84,6 +82,15 @@ export class StudentProfileService {
 
     if (!user) {
       throw new NotFoundException('User not found');
+    }
+
+    const existing = user.studentProfile;
+    const effectiveTotal = dto.totalCredits ?? existing?.totalCredits ?? 240;
+    const effectiveCompleted =
+      dto.completedCredits ?? existing?.completedCredits ?? 0;
+
+    if (effectiveCompleted > effectiveTotal) {
+      throw new BadRequestException('completedCredits cannot exceed totalCredits');
     }
 
     const updatedProfile = await this.prisma.studentProfile.upsert({

@@ -44,10 +44,10 @@ export class StudentProfileResponseDto {
   @ApiProperty({ enum: PaymentType })
   paymentType: PaymentType;
 
-  @ApiPropertyOptional({ example: 'KB № 84920194' })
+  @ApiPropertyOptional({ example: 'KB № 84920194', nullable: true })
   studentCardNumber?: string | null;
 
-  @ApiPropertyOptional({ example: 'ЗК-24-122-014' })
+  @ApiPropertyOptional({ example: 'ЗК-24-122-014', nullable: true })
   recordBookNumber?: string | null;
 
   @ApiProperty({

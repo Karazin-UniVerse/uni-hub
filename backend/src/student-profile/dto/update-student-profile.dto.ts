@@ -1,6 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -42,14 +43,14 @@ export class UpdateStudentProfileDto {
 
   @ApiPropertyOptional({ example: 2 })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(6)
   course?: number;
 
   @ApiPropertyOptional({ example: 4 })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
   @Min(1)
   @Max(12)
   semester?: number;
@@ -86,11 +87,13 @@ export class UpdateStudentProfileDto {
 
   @ApiPropertyOptional({ example: 240 })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Min(0)
   totalCredits?: number;
 
   @ApiPropertyOptional({ example: 90 })
   @IsOptional()
-  @IsNumber()
+  @IsInt()
+  @Min(0)
   completedCredits?: number;
 }
