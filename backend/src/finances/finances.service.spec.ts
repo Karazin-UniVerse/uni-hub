@@ -56,6 +56,12 @@ describe('FinancesService', () => {
   let service: FinancesService;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
+    mockPrisma.studentProfile.findUnique.mockResolvedValue(mockProfile);
+    mockPrisma.scholarshipRecord.findMany.mockResolvedValue([mockScholarship]);
+    mockPrisma.paymentTransaction.findMany.mockResolvedValue([mockPayment]);
+    mockPrisma.paymentTransaction.create.mockResolvedValue(mockPayment);
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         FinancesService,
@@ -64,7 +70,6 @@ describe('FinancesService', () => {
     }).compile();
 
     service = module.get<FinancesService>(FinancesService);
-    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
