@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { FinancesService } from './finances.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { PaymentStatus, PaymentType, ScholarshipStatus, ScholarshipType } from '@prisma/client';
+import { NotFoundException } from '@nestjs/common';
 
 const mockProfile = {
   id: 'prof-1',
@@ -39,28 +40,27 @@ const mockPayment = {
   updatedAt: new Date(),
 };
 
-const mockPrisma = {
-  studentProfile: {
-    findUnique: jest.fn().mockResolvedValue(mockProfile),
-  },
-  scholarshipRecord: {
-    findMany: jest.fn().mockResolvedValue([mockScholarship]),
-  },
-  paymentTransaction: {
-    findMany: jest.fn().mockResolvedValue([mockPayment]),
-    create: jest.fn().mockResolvedValue(mockPayment),
-  },
-};
-
 describe('FinancesService', () => {
   let service: FinancesService;
+  let mockPrisma: {
+    studentProfile: { findUnique: jest.Mock };
+    scholarshipRecord: { findMany: jest.Mock };
+    paymentTransaction: { findMany: jest.Mock; create: jest.Mock };
+  };
 
   beforeEach(async () => {
-    jest.clearAllMocks();
-    mockPrisma.studentProfile.findUnique.mockResolvedValue(mockProfile);
-    mockPrisma.scholarshipRecord.findMany.mockResolvedValue([mockScholarship]);
-    mockPrisma.paymentTransaction.findMany.mockResolvedValue([mockPayment]);
-    mockPrisma.paymentTransaction.create.mockResolvedValue(mockPayment);
+    mockPrisma = {
+      studentProfile: {
+        findUnique: jest.fn().mockResolvedValue(mockProfile),
+      },
+      scholarshipRecord: {
+        findMany: jest.fn().mockResolvedValue([mockScholarship]),
+      },
+      paymentTransaction: {
+        findMany: jest.fn().mockResolvedValue([mockPayment]),
+        create: jest.fn().mockResolvedValue(mockPayment),
+      },
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -84,7 +84,7 @@ describe('FinancesService', () => {
   });
 
   it('should throw NotFoundException if profile is missing in getOverview', async () => {
-    mockPrisma.studentProfile.findUnique.mockResolvedValueOnce(null);
+    mockPrisma.studentProfile.findUnique.mockResolvedValue(null);
     await expect(service.getOverview('user-no-profile')).rejects.toThrow(
       NotFoundException,
     );
