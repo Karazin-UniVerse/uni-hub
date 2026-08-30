@@ -123,8 +123,11 @@ async function main() {
   }
 
   // 5. Create sample payment transaction
-  await prisma.paymentTransaction.create({
-    data: {
+  await prisma.paymentTransaction.upsert({
+    where: { id: 'seed-payment-dormitory-2026' },
+    update: {},
+    create: {
+      id: 'seed-payment-dormitory-2026',
       userId: user.id,
       amount: 1450.0,
       purpose: 'Оплата за проживання в гуртожитку № 4',
@@ -132,7 +135,7 @@ async function main() {
       recipientName: 'Харківський національний університет імені В. Н. Каразіна',
       recipientIban: 'UA483510050000026001234567890',
       edrpou: '02071205',
-      paidAt: new Date(),
+      paidAt: new Date(2026, 7, 28),
     },
   });
 
