@@ -11,7 +11,7 @@ import {
   CertificateResponseDto,
   CertificateVerificationResponseDto,
 } from './dto/certificate-response.dto';
-import { CertificateStatus } from '@prisma/client';
+import { CertificateStatus, Role } from '@prisma/client';
 
 @Injectable()
 export class CertificatesService {
@@ -83,7 +83,12 @@ export class CertificatesService {
     }
 
     const student = cert.user.studentProfile;
-    const isSigned = cert.status === CertificateStatus.SIGNED || cert.status === CertificateStatus.READY;
+    const isSigned =
+      cert.status === CertificateStatus.SIGNED ||
+      cert.status === CertificateStatus.READY;
+    const issuedAt = isSigned
+      ? cert.processedAt || cert.updatedAt || cert.createdAt
+      : null;
 
     return {
       valid: isSigned,
@@ -94,7 +99,7 @@ export class CertificatesService {
       group: student?.group || 'Не вказано',
       university: student?.university || 'Харківський національний університет імені В. Н. Каразіна',
       status: cert.status,
-      issuedAt: cert.createdAt,
+      issuedAt,
       digitalSignature: isSigned
         ? `КЕП ХНУ імені В. Н. Каразіна (Реєстраційний № ${cert.verificationCode})`
         : 'Очікує підписання КЕП',
@@ -106,6 +111,23 @@ export class CertificatesService {
     dto: UpdateCertificateStatusDto,
     processedBy?: string,
   ): Promise<CertificateResponseDto> {
+    if (!processedBy) {
+      throw new ForbiddenException('Authentication required');
+    }
+
+    const adminUser = await this.prisma.user.findUnique({
+      where: { id: processedBy },
+    });
+
+    if (
+      !adminUser ||
+      (adminUser.role !== Role.ADMIN && adminUser.role !== Role.DEAN_OFFICE)
+    ) {
+      throw new ForbiddenException(
+        'Only Dean office staff or administrators can update certificate status',
+      );
+    }
+
     const exists = await this.prisma.certificateRequest.findUnique({
       where: { id },
     });
@@ -120,7 +142,7 @@ export class CertificatesService {
         status: dto.status,
         rejectionReason: dto.rejectionReason,
         pdfUrl: dto.pdfUrl,
-        processedBy,
+        processedBy: adminUser.name || adminUser.email,
         processedAt: new Date(),
       },
     });

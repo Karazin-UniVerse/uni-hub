@@ -71,8 +71,8 @@ export class CertificateVerificationResponseDto {
   @ApiProperty({ enum: CertificateStatus })
   status: CertificateStatus;
 
-  @ApiProperty()
-  issuedAt: Date;
+  @ApiPropertyOptional({ nullable: true })
+  issuedAt?: Date | null;
 
   @ApiProperty({ example: 'ЕЦП Сертифікат № 492019-ХНУ (ВАЛІДНИЙ)' })
   digitalSignature: string;
